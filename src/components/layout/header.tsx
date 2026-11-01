@@ -42,14 +42,14 @@ export function Header() {
   return (
     <>
       <header className="sticky top-0 z-50 border-b border-white/5 bg-charcoal">
-        <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
-          <Link href="/" className="flex shrink-0 items-center gap-3">
+        <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between gap-2 px-4 sm:gap-3 sm:px-6 lg:px-8">
+          <Link href="/" className="flex min-w-0 items-center gap-2.5 sm:gap-3">
             <BtsLogo priority />
-            <div className="leading-tight">
-              <span className="block whitespace-nowrap text-sm font-bold tracking-tight text-cream sm:text-base">
+            <div className="min-w-0 leading-tight">
+              <span className="block truncate text-sm font-bold tracking-tight text-cream sm:text-base">
                 ARMY Vault
               </span>
-              <span className="mt-0.5 hidden whitespace-nowrap text-[11px] leading-none text-purple-glow md:block">
+              <span className="mt-0.5 hidden truncate text-[11px] leading-none text-purple-glow md:block">
                 Borahae Collection
               </span>
             </div>
@@ -73,15 +73,15 @@ export function Header() {
           </nav>
 
           <div className="flex shrink-0 items-center gap-0.5 sm:gap-2">
-            <Link href="/vault" className="hidden md:inline-flex" aria-label="Your Client Card">
+            <Link href="/vault" className="hidden lg:inline-flex" aria-label="Your Client Card">
               <ClientCard size="chip" />
             </Link>
-            <div className="hidden md:block">
+            <div className="hidden 2xl:block">
               <InviteArmyButton />
             </div>
             <Link
               href="/explore"
-              className="hidden rounded-full p-2 text-cream/70 transition-colors hover:bg-white/5 hover:text-cream sm:flex"
+              className="hidden rounded-full p-2 text-cream/70 transition-colors hover:bg-white/5 hover:text-cream lg:flex"
               aria-label="Search"
             >
               <Search className="h-5 w-5" />

@@ -17,7 +17,7 @@ export default function ConcertsPage() {
             nights open the stage chart so you can choose a seat.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Link href="/box-office">
             <Button>Find seats</Button>
           </Link>

@@ -86,7 +86,7 @@ function MemberCrossSellCard({ memberId }: { memberId: ShopMemberId }) {
   return (
     <Link
       href={`/members/${memberId}`}
-      className="group relative flex shrink-0 flex-col overflow-hidden rounded-2xl border border-white/10 sm:shrink"
+      className="group relative flex w-40 shrink-0 flex-col overflow-hidden rounded-2xl border border-white/10 sm:w-auto sm:shrink"
     >
       <div className={`relative h-32 bg-gradient-to-br ${member.accentGradient}`}>
         <Image

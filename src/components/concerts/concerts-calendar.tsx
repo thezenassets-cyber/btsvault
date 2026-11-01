@@ -149,9 +149,9 @@ function ConcertCard({ concert }: { concert: Concert }) {
           <Calendar className="h-4 w-4 text-purple-glow" />
           {formatDate(concert.date)}
         </div>
-        <div className="flex items-center gap-2 text-sm text-cream/60">
-          <MapPin className="h-4 w-4 text-purple-glow" />
-          {concert.venue}
+        <div className="flex items-start gap-2 text-sm text-cream/60">
+          <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-purple-glow" />
+          <span className="min-w-0">{concert.venue}</span>
         </div>
         <div className="flex gap-2 pt-2">
           <Link href="/explore?q=arirang" className="flex-1">

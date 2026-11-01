@@ -66,7 +66,7 @@ function ApplyForm() {
         <Badge variant="purple" className="mt-4">
           Status: Pending review
         </Badge>
-        <div className="mt-8 flex gap-3">
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link href="/experiences">
             <Button variant="secondary">View All Events</Button>
           </Link>

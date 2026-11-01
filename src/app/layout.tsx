@@ -46,7 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <OrderProvider>
               <ClientCardProvider>
                 <Header />
-                <main>{children}</main>
+                <main className="min-w-0">{children}</main>
                 <Footer />
               </ClientCardProvider>
             </OrderProvider>

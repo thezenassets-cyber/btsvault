@@ -24,9 +24,9 @@ export function HeroSection() {
     <section className="relative">
       <div className="absolute inset-0 bg-gradient-to-br from-purple-deep/45 via-charcoal to-charcoal" />
 
-      <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
+      <div className="relative mx-auto grid w-full min-w-0 max-w-7xl items-center gap-8 px-4 py-10 sm:gap-12 sm:px-6 sm:py-24 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:px-8">
         <ClientCard size="hero" editable />
-        <div>
+        <div className="min-w-0">
         <p className="mb-3 font-display text-sm font-semibold tracking-[0.25em] text-purple-glow uppercase">
           ARMY Vault
         </p>

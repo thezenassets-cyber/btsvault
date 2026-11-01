@@ -190,7 +190,7 @@ export function EventBoxOffice({ concert }: { concert: Concert }) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mb-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+      <div className="mb-8 grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center">
         <div className="relative aspect-[16/9] overflow-hidden rounded-3xl border border-white/10">
           <Image
             src={concert.image || "/concerts/arirang-hero.jpg"}
@@ -251,11 +251,11 @@ export function EventBoxOffice({ concert }: { concert: Concert }) {
       )}
 
       {step === "rolls" && (
-        <section className="mt-8 grid gap-8 lg:grid-cols-[1fr_320px]">
+        <section className="mt-8 grid min-w-0 gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="space-y-6">
             {ROLLS.map((roll) => (
               <div key={roll}>
-                <div className="mb-3 flex items-end justify-between gap-3">
+                <div className="mb-3 flex min-w-0 items-end justify-between gap-3">
                   <div>
                     <h3 className="font-display text-xl font-bold text-cream">{ROLL_META[roll].label}</h3>
                     <p className="text-sm text-cream/45">{ROLL_META[roll].blurb}</p>

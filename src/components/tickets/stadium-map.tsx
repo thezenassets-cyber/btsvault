@@ -47,7 +47,7 @@ export function StadiumMap({
   const marked = new Set(selectedSectionIds ?? []);
 
   return (
-    <svg viewBox="0 0 960 720" className="w-full" role="img" aria-label="Concert floor plan">
+    <svg viewBox="0 0 960 720" className="h-auto w-full max-w-full" role="img" aria-label="Concert floor plan">
       <rect width="960" height="720" rx="28" fill="#0c0a10" />
       <text x="480" y="16" textAnchor="middle" fill="#8ea0be" fontSize="11" letterSpacing="3">
         UPPER BOWL

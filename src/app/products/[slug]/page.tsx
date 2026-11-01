@@ -50,7 +50,7 @@ export default async function ProductPage({ params }: PageProps) {
         <span className="text-cream/80 line-clamp-1">{product.name}</span>
       </nav>
 
-      <div className="grid gap-12 lg:grid-cols-2">
+      <div className="grid min-w-0 gap-12 lg:grid-cols-2">
         <ProductGallery product={product} eraStripClass={era?.stripClass} />
 
         <div>
@@ -173,7 +173,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between gap-4 text-sm">
       <dt className="text-cream/40">{label}</dt>
-      <dd className="text-right text-cream/80 capitalize">{value}</dd>
+      <dd className="min-w-0 break-words text-right text-cream/80 capitalize">{value}</dd>
     </div>
   );
 }

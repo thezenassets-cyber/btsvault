@@ -170,7 +170,7 @@ export function CheckoutClient() {
         ))}
       </ol>
 
-      <div className="mt-10 grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
+      <div className="mt-10 grid min-w-0 gap-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
         <div className="space-y-6">
           {step === 0 && (
             <section className="rounded-2xl glass p-6">

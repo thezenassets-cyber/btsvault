@@ -35,7 +35,7 @@ export default function VaultPage() {
             {items.length !== 1 ? "s" : ""}.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Link href="/members">
             <Button variant="secondary">
               <Users className="h-4 w-4" /> Member Shops

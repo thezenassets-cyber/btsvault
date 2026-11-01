@@ -27,7 +27,7 @@ export function ClientCard({
     return (
       <span
         className={cn(
-          "hidden items-center gap-2 rounded-full border border-gold/30 bg-gradient-to-r from-[#2a2114] to-[#3a2a4a] px-3 py-1.5 md:inline-flex",
+          "hidden items-center gap-2 rounded-full border border-gold/30 bg-gradient-to-r from-[#2a2114] to-[#3a2a4a] px-3 py-1.5 lg:inline-flex",
           className
         )}
       >
@@ -51,7 +51,8 @@ export function ClientCard({
       className={cn(
         "relative overflow-hidden rounded-3xl border border-gold/30 shadow-2xl",
         "bg-gradient-to-br from-[#1c140c] via-[#3a2458] to-[#120c18]",
-        compact ? "aspect-[1.7/1] w-full max-w-md" : "aspect-[1.7/1] w-full max-w-lg",
+        "aspect-[1.7/1] w-full min-w-0 max-w-full",
+        compact ? "sm:max-w-md" : "sm:max-w-lg",
         className
       )}
     >
@@ -65,7 +66,7 @@ export function ClientCard({
             </p>
             <p className="mt-1 font-display text-lg font-bold text-cream">Client Card</p>
           </div>
-          <span className="rounded-full border border-gold/40 bg-black/30 px-3 py-1 text-[10px] font-semibold tracking-wider text-gold uppercase">
+          <span className="shrink-0 rounded-full border border-gold/40 bg-black/30 px-2.5 py-1 text-[10px] font-semibold tracking-wider text-gold uppercase sm:px-3">
             {TIER_LABEL[tier]}
           </span>
         </div>
@@ -86,7 +87,7 @@ export function ClientCard({
             ) : (
               <p className="truncate text-sm font-medium text-cream">{profile.holderName}</p>
             )}
-            <p className="mt-2 font-mono text-sm tracking-[0.18em] text-cream/80 sm:text-base">
+            <p className="mt-2 overflow-hidden font-mono text-xs tracking-[0.12em] text-cream/80 sm:text-sm sm:tracking-[0.18em]">
               {ready ? profile.number : "\u00a0"}
             </p>
           </div>

@@ -26,7 +26,7 @@ export function ProductGallery({ product, eraStripClass }: { product: Product; e
         )}
       </div>
       {shots.length > 1 && (
-        <div className="flex gap-2">
+        <div className="scroll-row flex gap-2">
           {shots.map((src, i) => (
             <button
               key={src}

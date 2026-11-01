@@ -41,7 +41,7 @@ export function MemberHero({ member }: { member: ShopMember }) {
             sizes="176px"
           />
         </div>
-        <div className="mt-6 flex-1 lg:mt-0">
+        <div className="mt-6 min-w-0 flex-1 lg:mt-0">
           <Badge variant="purple">{member.shopBadge}</Badge>
           <p className="mt-3 text-sm font-medium tracking-widest text-purple-glow uppercase">
             {member.tagline}

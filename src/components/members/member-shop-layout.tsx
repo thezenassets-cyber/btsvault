@@ -136,7 +136,7 @@ function StatPill({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3">
       <p className="text-xs text-cream/40">{label}</p>
-      <p className="mt-1 text-sm font-semibold text-cream">{value}</p>
+      <p className="mt-1 break-words text-sm font-semibold text-cream">{value}</p>
     </div>
   );
 }

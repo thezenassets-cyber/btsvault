@@ -11,7 +11,7 @@ function ExploreContent() {
   return (
     <>
       <ExploreMemberBanner />
-      <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
+      <div className="grid min-w-0 gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
         <ExploreFilters />
         <ProductGrid products={products} emptyMessage="No items match your filters. Try broadening your search." />
       </div>
