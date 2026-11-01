@@ -1,0 +1,135 @@
+@import "tailwindcss";
+
+@theme {
+  --color-purple-deep: #4a148c;
+  --color-purple-main: #7b2cbf;
+  --color-purple-light: #9d4edd;
+  --color-purple-glow: #c77dff;
+  --color-cream: #f8f7f4;
+  --color-charcoal: #1a1a1a;
+  --color-charcoal-soft: #2a2a2e;
+  --color-gold: #d4af37;
+  --color-era-hyyh: #f4a6b8;
+  --color-era-mots: #4a90d9;
+  --color-era-be: #e8e0d5;
+  --color-era-proof: #1a1a1a;
+
+  --font-display: var(--font-inter), "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-body: var(--font-dm), "DM Sans", "Segoe UI", system-ui, sans-serif;
+}
+
+@layer base {
+  * {
+    border-color: rgb(255 255 255 / 0.1);
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  body {
+    background-color: var(--color-charcoal);
+    color: var(--color-cream);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: var(--font-body);
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  ::selection {
+    background-color: rgb(123 44 191 / 0.4);
+    color: white;
+  }
+}
+
+@layer utilities {
+  .text-gradient-purple {
+    @apply bg-gradient-to-r from-purple-light via-purple-glow to-purple-main bg-clip-text text-transparent;
+  }
+
+  .glow-purple {
+    box-shadow: 0 0 40px rgba(157, 78, 221, 0.25);
+  }
+
+  .glass {
+    @apply border border-white/10 bg-charcoal-soft;
+  }
+
+  .scroll-row {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .era-strip-hyyh {
+    background: linear-gradient(90deg, #f4a6b8, #7ec8c8);
+  }
+
+  .era-strip-mots {
+    background: linear-gradient(90deg, #4a90d9, #1a1a1a);
+  }
+
+  .era-strip-be {
+    background: linear-gradient(90deg, #e8e0d5, #c4b5a0);
+  }
+
+  .era-strip-proof {
+    background: linear-gradient(90deg, #1a1a1a, #7b2cbf);
+  }
+
+  .era-strip-ly {
+    background: linear-gradient(90deg, #ff6b9d, #ffd93d);
+  }
+}
+
+.page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #050505;
+}
+
+.page-loader-mark {
+  animation: page-loader-mark 0.9s ease-in-out infinite;
+}
+
+@keyframes page-loader-mark {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media print {
+  @page {
+    size: landscape;
+    margin: 12mm;
+  }
+
+  header,
+  footer,
+  .page-loader,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #fff !important;
+  }
+
+  .ticket-sheet {
+    box-shadow: none !important;
+    margin: 0 !important;
+  }
+}

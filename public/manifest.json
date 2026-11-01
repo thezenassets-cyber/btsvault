@@ -1,0 +1,9 @@
+{
+  "name": "ARMY Vault",
+  "short_name": "ARMY Vault",
+  "description": "BTS merchandise discovery and collection platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#7b2cbf"
+}
