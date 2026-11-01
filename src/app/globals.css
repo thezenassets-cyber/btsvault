@@ -128,7 +128,9 @@
   header,
   footer,
   .page-loader,
-  .no-print {
+  .no-print,
+  #tawkchat-container,
+  #tawk-bubble-container {
     display: none !important;
   }
 

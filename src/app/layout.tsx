@@ -3,6 +3,7 @@ import { Inter, DM_Sans } from "next/font/google";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { PageLoader } from "@/components/layout/page-loader";
+import { TawkWidget } from "@/components/support/tawk-widget";
 import { VaultProvider } from "@/components/vault/vault-context";
 import { CartProvider } from "@/components/cart/cart-context";
 import { OrderProvider } from "@/components/cart/order-context";
@@ -48,6 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Header />
                 <main className="min-w-0">{children}</main>
                 <Footer />
+                <TawkWidget />
               </ClientCardProvider>
             </OrderProvider>
           </CartProvider>
