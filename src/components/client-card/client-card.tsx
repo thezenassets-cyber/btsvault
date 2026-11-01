@@ -20,7 +20,7 @@ export function ClientCard({
   editable?: boolean;
   className?: string;
 }) {
-  const { profile, tier, setHolderName } = useClientCard();
+  const { profile, tier, ready, setHolderName } = useClientCard();
   const [draft, setDraft] = useState<string | null>(null);
 
   if (size === "chip") {
@@ -35,9 +35,11 @@ export function ClientCard({
         <span className="max-w-[7rem] truncate text-xs font-semibold text-cream">
           {profile.holderName}
         </span>
-        <span className="font-mono text-[10px] tracking-wider text-gold/80">
-          {profile.number.slice(-4)}
-        </span>
+        {ready && (
+          <span className="font-mono text-[10px] tracking-wider text-gold/80">
+            {profile.number.slice(-4)}
+          </span>
+        )}
       </span>
     );
   }
@@ -85,12 +87,12 @@ export function ClientCard({
               <p className="truncate text-sm font-medium text-cream">{profile.holderName}</p>
             )}
             <p className="mt-2 font-mono text-sm tracking-[0.18em] text-cream/80 sm:text-base">
-              {profile.number}
+              {ready ? profile.number : "\u00a0"}
             </p>
           </div>
           <div className="text-right">
             <p className="text-[10px] tracking-widest text-cream/40 uppercase">Code</p>
-            <p className="font-mono text-sm text-gold">{profile.code}</p>
+            <p className="font-mono text-sm text-gold">{ready ? profile.code : "\u00a0"}</p>
           </div>
         </div>
       </div>

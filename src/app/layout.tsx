@@ -24,6 +24,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://armyvault.site"),
   title: "ARMY Vault — BTS Merchandise Megastore",
   description:
     "Present your Client Card. Shop BTS merch and choose your seat for every remaining ARIRANG show. 32 million+ active users worldwide.",

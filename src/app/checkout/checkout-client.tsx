@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Check, CreditCard, MapPin, ShoppingBag } from "lucide-react";
+import { Check, MapPin, ShoppingBag } from "lucide-react";
 import { lineUnitPrice, useCart } from "@/components/cart/cart-context";
 import { useOrders } from "@/components/cart/order-context";
 import { useClientCard } from "@/components/client-card/client-card-context";
@@ -18,7 +18,7 @@ import type { OrderLineItem, PaymentDetails, ShippingAddress } from "@/lib/types
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-const STEPS = ["Cart", "Shipping", "Payment", "Review"] as const;
+const STEPS = ["Cart", "Shipping", "Review"] as const;
 
 const emptyShipping: ShippingAddress = {
   fullName: "",
@@ -36,11 +36,9 @@ export function CheckoutClient() {
   const router = useRouter();
   const { items, ready, grandTotal, clearCart } = useCart();
   const { saveOrder } = useOrders();
-  const { profile } = useClientCard();
+  const { profile, ready: cardReady } = useClientCard();
   const [step, setStep] = useState(0);
   const [shipping, setShipping] = useState<ShippingAddress>(emptyShipping);
-  const [cardName, setCardName] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -104,9 +102,9 @@ export function CheckoutClient() {
   const { shippingFee, tax, total } = quoteTotals(lineItems, shipping.country || "US", grandTotal);
 
   const paymentPreview: PaymentDetails = {
-    cardholderName: cardName || "ARMY Collector",
-    last4: cardNumber.replace(/\s/g, "").slice(-4) || "4242",
-    brand: "Visa",
+    cardholderName: profile.holderName,
+    last4: profile.number.replace(/\D/g, "").slice(-4),
+    brand: "Client Card",
   };
 
   async function placeOrder() {
@@ -152,7 +150,7 @@ export function CheckoutClient() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
       <h1 className="font-display text-3xl font-bold text-cream">Checkout</h1>
-      <p className="mt-1 text-sm text-cream/50">Demo checkout — Stripe-ready when keys are added.</p>
+      <p className="mt-1 text-sm text-cream/50">Your order is placed on your Client Card.</p>
 
       <ol className="mt-8 flex flex-wrap gap-2">
         {STEPS.map((label, i) => (
@@ -254,54 +252,16 @@ export function CheckoutClient() {
                       return;
                     }
                     setError(null);
-                    setStep(2);
+                    setStep(2); // review
                   }}
                 >
-                  Continue to payment
-                </Button>
-              </div>
-            </section>
-          )}
-
-          {step === 2 && (
-            <section className="rounded-2xl glass p-6">
-              <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-cream">
-                <CreditCard className="h-5 w-5 text-purple-glow" /> Payment
-              </h2>
-              <p className="mb-4 text-xs text-cream/40">
-                Demo mode — no real charge. Card details stay in-browser for this mock.
-              </p>
-              <div className="space-y-3">
-                <label className="block text-xs text-cream/50">
-                  Cardholder name
-                  <Input className="mt-1" value={cardName} onChange={(e) => setCardName(e.target.value)} />
-                </label>
-                <label className="block text-xs text-cream/50">
-                  Card number
-                  <Input
-                    className="mt-1"
-                    placeholder="4242 4242 4242 4242"
-                    value={cardNumber}
-                    onChange={(e) => setCardNumber(e.target.value)}
-                  />
-                </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <Input placeholder="MM/YY" />
-                  <Input placeholder="CVC" />
-                </div>
-              </div>
-              <div className="mt-6 flex gap-3">
-                <Button variant="outline" onClick={() => setStep(1)}>
-                  Back
-                </Button>
-                <Button className="flex-1" onClick={() => setStep(3)}>
                   Review order
                 </Button>
               </div>
             </section>
           )}
 
-          {step === 3 && (
+          {step === 2 && (
             <section className="rounded-2xl glass p-6">
               <h2 className="mb-4 text-lg font-semibold text-cream">Review & place order</h2>
               <dl className="space-y-2 text-sm">
@@ -315,28 +275,22 @@ export function CheckoutClient() {
                 </div>
                 <div className="flex justify-between gap-4">
                   <dt className="text-cream/50">Client Card</dt>
-                  <dd className="font-mono text-cream">{profile.number}</dd>
-                </div>
-                <div className="flex justify-between gap-4">
-                  <dt className="text-cream/50">Pay with</dt>
-                  <dd className="text-cream">
-                    {paymentPreview.brand} •••• {paymentPreview.last4}
-                  </dd>
+                  <dd className="font-mono text-cream">{cardReady ? profile.number : ""}</dd>
                 </div>
               </dl>
               {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
               <div className="mt-6 flex gap-3">
-                <Button variant="outline" onClick={() => setStep(2)}>
+                <Button variant="outline" onClick={() => setStep(1)}>
                   Back
                 </Button>
                 <Button className="flex-1" onClick={placeOrder} disabled={submitting}>
-                  {submitting ? "Processing…" : `Pay ${formatPrice(total)} (Demo)`}
+                  {submitting ? "Placing order…" : `Place order · ${formatPrice(total)}`}
                 </Button>
               </div>
             </section>
           )}
 
-          {error && step < 3 && <p className="text-sm text-red-400">{error}</p>}
+          {error && step < 2 && <p className="text-sm text-red-400">{error}</p>}
         </div>
 
         <aside className="h-fit space-y-4">
@@ -361,7 +315,7 @@ export function CheckoutClient() {
               <dd className="text-cream">{formatPrice(total)}</dd>
             </div>
           </dl>
-          <p className="mt-4 text-xs text-cream/40">Charged to Client Card {profile.number}</p>
+          <p className="mt-4 text-xs text-cream/40">Placed on Client Card {cardReady ? profile.number : ""}</p>
           </div>
         </aside>
       </div>

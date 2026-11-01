@@ -1,4 +1,5 @@
 import type { EmailTemplate } from "@/lib/types";
+import { STORE_PROMISE } from "@/lib/promise";
 
 const KEY = "army-vault-email-templates";
 
@@ -17,7 +18,7 @@ Please reply to confirm your attendance and watch for slot-selection instruction
 Borahae,
 ARMY Vault Experiences Team
 
-(This is a fan-project demo email — not affiliated with HYBE / BIGHIT MUSIC.)`,
+${STORE_PROMISE}`,
   updatedAt: new Date().toISOString(),
 };
 

@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { BtsLogo } from "@/components/brand/bts-logo";
 
 function isInternalNavigation(event: MouseEvent) {
   if (event.defaultPrevented || event.button !== 0) return false;
@@ -29,7 +28,7 @@ export function PageLoader() {
     }
     setVisible(true);
     window.clearTimeout(safety.current);
-    safety.current = window.setTimeout(() => setVisible(false), 640);
+    safety.current = window.setTimeout(() => setVisible(false), 450);
     return () => window.clearTimeout(safety.current);
   }, [pathname]);
 
@@ -38,7 +37,7 @@ export function PageLoader() {
       if (!isInternalNavigation(event)) return;
       setVisible(true);
       window.clearTimeout(safety.current);
-      safety.current = window.setTimeout(() => setVisible(false), 1200);
+      safety.current = window.setTimeout(() => setVisible(false), 700);
     }
     document.addEventListener("click", onClick, true);
     return () => {
@@ -50,8 +49,6 @@ export function PageLoader() {
   if (!visible) return null;
 
   return (
-    <div className="page-loader" role="status" aria-label="Loading">
-      <BtsLogo size="loader" alt="" priority />
-    </div>
+    <div className="page-loader" role="status" aria-label="Loading" />
   );
 }

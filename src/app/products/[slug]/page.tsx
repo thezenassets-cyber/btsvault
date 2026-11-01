@@ -92,8 +92,7 @@ export default async function ProductPage({ params }: PageProps) {
 
           {product.type === "experience" && (
             <div className="mt-6 rounded-xl border border-gold/30 bg-gold/5 p-4 text-sm text-cream/70">
-              Experience ticket — after checkout you&apos;ll receive slot selection instructions
-              by email (demo).
+              Experience ticket — after checkout, slot instructions are sent to the email on your Client Card.
             </div>
           )}
 

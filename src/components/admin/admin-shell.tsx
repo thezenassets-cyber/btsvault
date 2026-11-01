@@ -44,7 +44,7 @@ export function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
     <div className="mx-auto max-w-md rounded-2xl glass p-8">
       <h1 className="text-2xl font-bold text-cream">Admin Gate</h1>
       <p className="mt-2 text-sm text-cream/50">
-        Enter the demo gate code to manage the box office, applications, and email templates.
+        Enter the gate code to manage the box office, applications, and email templates.
       </p>
       <form
         className="mt-6 space-y-4"
@@ -66,7 +66,6 @@ export function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
           Enter
         </Button>
       </form>
-      <p className="mt-4 text-xs text-cream/35">Hint for demo: army-admin</p>
     </div>
   );
 }

@@ -66,7 +66,7 @@ export default function AdminBoxOfficePage() {
     <AdminShell title="Box office">
       <p className="max-w-2xl text-sm text-cream/50">
         One row per seat. The admit code is the seat, so Front Outer on the left never sits in the
-        same place as Front Outer on the right. Paid demo orders stay in this browser.
+        same place as Front Outer on the right. Paid orders stay in this browser.
       </p>
       <Input
         value={query}
@@ -77,7 +77,7 @@ export default function AdminBoxOfficePage() {
       {!ready && <p className="mt-8 text-sm text-cream/50">Loading the ledger…</p>}
       {ready && rows.length === 0 && (
         <p className="mt-8 text-sm text-cream/50">
-          No seats in this browser yet. A paid demo order on this device will appear here.
+          No seats in this browser yet. A paid order on this device will appear here.
         </p>
       )}
       {ready && rows.length > 0 && visible.length === 0 && (

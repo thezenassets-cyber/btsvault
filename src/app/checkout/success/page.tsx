@@ -34,7 +34,7 @@ function SuccessInner() {
     return (
       <div className="mx-auto max-w-lg px-4 py-24 text-center">
         <h1 className="text-2xl font-bold text-cream">Order confirmed</h1>
-        <p className="mt-2 text-cream/50">We couldn&apos;t load order details, but your demo payment succeeded.</p>
+        <p className="mt-2 text-cream/50">This order is not on this Client Card.</p>
         <Link href="/explore" className="mt-6 inline-block">
           <Button>Keep shopping</Button>
         </Link>
@@ -47,7 +47,7 @@ function SuccessInner() {
       <CheckCircle2 className="mx-auto h-14 w-14 text-green-400" />
       <h1 className="mt-4 text-3xl font-bold text-cream">You&apos;re in, ARMY</h1>
       <p className="mt-2 text-cream/60">
-        Demo order <span className="font-mono text-purple-glow">{order.id}</span> is marked paid.
+        Order <span className="font-mono text-purple-glow">{order.id}</span> is on your Client Card.
       </p>
       <p className="mt-4 text-2xl font-bold text-cream">{formatPrice(order.total)}</p>
       <p className="mt-1 text-sm text-cream/40">

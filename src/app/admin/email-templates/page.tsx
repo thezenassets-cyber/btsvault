@@ -104,7 +104,7 @@ export default function AdminEmailTemplatesPage() {
           </div>
           <Button onClick={save}>{saved ? "Saved ✓" : "Save template"}</Button>
           <p className="text-xs text-cream/40">
-            Demo storage in localStorage. Set RESEND_API_KEY server-side to enable live send seam.
+            Templates are stored in this browser. Set RESEND_API_KEY server-side to send live mail.
           </p>
         </div>
         <div className="rounded-2xl glass p-6">

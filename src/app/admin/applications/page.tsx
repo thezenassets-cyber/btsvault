@@ -148,7 +148,7 @@ export default function AdminApplicationsPage() {
           <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/10 bg-charcoal p-6">
             <h2 className="text-xl font-bold text-cream">Acceptance email</h2>
             <p className="mt-1 text-sm text-cream/50">
-              Customize before send (demo stores outbound log; Resend when key is set).
+              Customize before send. Outbound mail is logged on this browser until Resend is configured.
             </p>
             <div className="mt-4 space-y-3">
               <div>
@@ -183,7 +183,7 @@ export default function AdminApplicationsPage() {
               <Button variant="ghost" onClick={() => setComposer(null)}>
                 Cancel
               </Button>
-              <Button onClick={confirmAccept}>Send (demo)</Button>
+              <Button onClick={confirmAccept}>Send</Button>
             </div>
           </div>
         </div>
