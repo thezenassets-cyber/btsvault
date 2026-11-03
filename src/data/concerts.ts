@@ -998,7 +998,7 @@ export function resolveConcertStatus(date: string): Concert["status"] {
 export const concerts: Concert[] = concertSchedule.map((c) => ({
   ...c,
   status: resolveConcertStatus(c.date),
-  image: concertPoster(c.city),
+  image: c.date >= "2026-11-19" ? `/concerts/nights/${c.id}.jpg` : concertPoster(c.city),
 }));
 
 export function isSellableConcert(concert: Concert) {

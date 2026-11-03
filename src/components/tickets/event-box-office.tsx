@@ -30,7 +30,13 @@ import { STORE_PROMISE } from "@/lib/promise";
 
 const ROLLS: RollId[] = ["front", "middle", "back"];
 const MAX_SEATS = 8;
-const STEPS = ["rolls", "seats", "review"] as const;
+const STEPS = ["rolls", "seats", "access", "review"] as const;
+const STEP_LABEL: Record<(typeof STEPS)[number], string> = {
+  rolls: "Rolls",
+  seats: "Seats",
+  access: "Special access",
+  review: "Review",
+};
 type Step = (typeof STEPS)[number];
 
 const MERCH_IDS = ["lightstick-ver4", "arirang-tour-tee", "army-membership-kit", "incense-arirang"];
@@ -227,7 +233,7 @@ export function EventBoxOffice({ concert }: { concert: Concert }) {
                   step === id ? "bg-purple-main text-white" : "bg-white/5 text-cream/50"
                 )}
               >
-                {index + 1} {id}
+                {index + 1} {STEP_LABEL[id]}
               </li>
             ))}
           </ol>
@@ -240,7 +246,7 @@ export function EventBoxOffice({ concert }: { concert: Concert }) {
         </div>
       </div>
 
-      {step !== "review" && (
+      {(step === "rolls" || step === "seats") && (
         <div className="max-w-full overflow-hidden rounded-3xl border border-white/10 bg-black/20 p-3 sm:p-4">
           <StadiumMap
             activeSectionId={activeId}
@@ -400,10 +406,70 @@ export function EventBoxOffice({ concert }: { concert: Concert }) {
             <Button variant="outline" onClick={() => setStep("rolls")}>
               Add another roll
             </Button>
-            <Button disabled={held.length === 0} onClick={() => setStep("review")}>
-              Review tickets
+            <Button disabled={held.length === 0} onClick={() => setStep("access")}>
+              Special access
             </Button>
           </div>
+        </section>
+      )}
+
+      {step === "access" && (
+        <section className="mt-8 grid min-w-0 gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
+          <div className="min-w-0 rounded-3xl glass p-4 sm:p-5">
+            <h3 className="font-display text-2xl font-bold text-cream">Special access</h3>
+            <p className="mt-2 text-sm text-cream/55">
+              Add one extra for this hold. It is priced once and stays on the seat you mark. Skip it if you only need the seats.
+            </p>
+            <div className="mt-5 space-y-2">
+              {privateAccessOffers.map((offer) => {
+                const on = accessId === offer.id;
+                return (
+                  <button
+                    key={offer.id}
+                    type="button"
+                    onClick={() => {
+                      setAccessId(on ? null : offer.id);
+                      setNotice(null);
+                    }}
+                    className={cn(
+                      "w-full rounded-xl border px-4 py-3 text-left",
+                      on ? "border-gold/60 bg-gold/10" : "border-white/10 hover:border-white/25"
+                    )}
+                  >
+                    <span className="flex items-center justify-between gap-2 text-sm font-medium text-cream">
+                      {offer.title}
+                      <span className="text-gold">{formatPrice(offer.price)}</span>
+                    </span>
+                    <span className="mt-1 block text-xs text-cream/50">{offer.description}</span>
+                  </button>
+                );
+              })}
+            </div>
+            {access?.requiresMember && (
+              <label className="mt-4 block text-sm text-cream/70">
+                Member
+                <select
+                  value={memberId}
+                  onChange={(event) => setMemberId(event.target.value as MemberId)}
+                  className="mt-2 w-full rounded-xl border border-white/10 bg-charcoal px-3 py-2 text-sm text-cream"
+                >
+                  <option value="">Choose a member</option>
+                  {PRIVATE_ACCESS_MEMBERS.map((member) => (
+                    <option key={member.id} value={member.id}>
+                      {member.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button variant="outline" onClick={() => setStep("seats")}>
+                Back to seats
+              </Button>
+              <Button onClick={() => setStep("review")}>Review tickets</Button>
+            </div>
+          </div>
+          <HoldSummary concertId={concert.id} held={held} />
         </section>
       )}
 
@@ -412,7 +478,7 @@ export function EventBoxOffice({ concert }: { concert: Concert }) {
           <div className="min-w-0 rounded-3xl glass p-4 sm:p-5">
             <h3 className="font-display text-2xl font-bold text-cream">Your tickets</h3>
             <p className="mt-1 text-sm text-cream/45">
-              Each row is one admit code. Private access stays on the seat you mark.
+              Each row is one admit code. Special access stays on the seat you mark.
             </p>
             <ul className="mt-4 space-y-3 md:hidden">
               {held.map((seat) => {
@@ -489,12 +555,12 @@ export function EventBoxOffice({ concert }: { concert: Concert }) {
                 </tbody>
               </table>
             </div>
-            <Button className="mt-6" variant="outline" onClick={() => setStep("seats")}>
-              Back to seats
+            <Button className="mt-6" variant="outline" onClick={() => setStep("access")}>
+              Special access
             </Button>
           </div>
           <aside className="h-fit rounded-3xl border border-white/10 bg-white/5 p-5">
-            <p className="text-xs font-semibold tracking-widest text-gold uppercase">Private access</p>
+            <p className="text-xs font-semibold tracking-widest text-gold uppercase">Special access</p>
             {accessSeat && (
               <p className="mt-2 break-all font-mono text-[11px] text-cream/70">
                 {admitCode(concert.id, accessSeat.section.id, accessSeat.row, accessSeat.seat)}
@@ -548,7 +614,7 @@ export function EventBoxOffice({ concert }: { concert: Concert }) {
                 <dd>{formatPrice(seatTotal)}</dd>
               </div>
               <div className="flex justify-between text-cream/60">
-                <dt>Private access</dt>
+                <dt>Special access</dt>
                 <dd>{formatPrice(accessTotal)}</dd>
               </div>
               <div className="flex justify-between pt-2 text-base font-bold text-cream">
