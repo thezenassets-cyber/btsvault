@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, MapPin, ShoppingBag } from "lucide-react";
@@ -16,6 +15,8 @@ import { submitCheckout } from "@/lib/payments/checkout";
 import { quoteTotals } from "@/lib/payments/types";
 import type { OrderLineItem, PaymentDetails, ShippingAddress } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { CatalogPhoto } from "@/components/catalog/catalog-photo";
+import { resolveProductPhoto } from "@/lib/product-images";
 import { Input } from "@/components/ui/input";
 
 const STEPS = ["Cart", "Shipping", "Review"] as const;
@@ -114,7 +115,12 @@ export function CheckoutClient() {
       const data = await submitCheckout({
         shipping,
         payment: paymentPreview,
-        items: lineItems,
+        items: lineItems.map((item) => {
+          if (item.seat) return item;
+          const product = getProductById(item.productId);
+          if (!product) return item;
+          return { ...item, image: resolveProductPhoto(product.slug, product.image) };
+        }),
         subtotal: grandTotal,
         currency: "USD",
         clientCardNumber: profile.number,
@@ -330,7 +336,14 @@ function CheckoutLine({ item }: { item: OrderLineItem }) {
   return (
     <li className="flex gap-3">
       <div className="relative h-16 w-16 overflow-hidden rounded-lg bg-charcoal">
-        <Image src={item.image} alt={item.name} fill className="object-cover" sizes="64px" />
+        <CatalogPhoto
+          slug={item.seat ? undefined : getProductById(item.productId)?.slug}
+          src={item.image}
+          alt={item.name}
+          fill
+          className="object-cover"
+          sizes="64px"
+        />
       </div>
       <div className="min-w-0 flex-1">
         {code && <p className="font-mono text-[11px] text-gold">{code}</p>}

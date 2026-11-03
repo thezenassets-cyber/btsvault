@@ -22,6 +22,19 @@ export default function AdminHomePage() {
           </Button>
         </Link>
         <Link
+          href="/admin/catalog"
+          className="rounded-2xl border border-white/10 bg-white/5 p-6 hover:border-purple-light/40 sm:col-span-2"
+        >
+          <h2 className="text-lg font-semibold text-cream">Catalog photos</h2>
+          <p className="mt-2 text-sm text-cream/50">
+            Replace the photo on any item that can go in the cart. The new photo shows in this browser
+            until you reset it. The file on the site stays until it is published.
+          </p>
+          <Button className="mt-4" size="sm">
+            Open catalog
+          </Button>
+        </Link>
+        <Link
           href="/admin/applications"
           className="rounded-2xl border border-white/10 bg-white/5 p-6 hover:border-purple-light/40"
         >

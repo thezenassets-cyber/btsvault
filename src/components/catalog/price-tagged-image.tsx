@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { Product } from "@/lib/types";
 import { getProductPrice } from "@/lib/catalog";
 import { formatPrice, cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { CatalogPhoto } from "@/components/catalog/catalog-photo";
 
 interface PriceTaggedImageProps {
   product: Product;
@@ -59,31 +59,18 @@ export function PriceTaggedImage({
 
   return (
     <div className={cn("relative overflow-hidden bg-charcoal-soft", className)}>
-      {fill ? (
-        <Image
-          key={src}
-          src={src}
-          alt={product.name}
-          fill
-          priority={priority}
-          className={cn("object-cover", imageClassName)}
-          sizes={sizes}
-          unoptimized
-          onError={() => setSrc(fallbackFor(product.type))}
-        />
-      ) : (
-        <Image
-          key={src}
-          src={src}
-          alt={product.name}
-          width={width ?? 800}
-          height={height ?? 800}
-          priority={priority}
-          className={cn("h-auto w-full object-cover", imageClassName)}
-          unoptimized
-          onError={() => setSrc(fallbackFor(product.type))}
-        />
-      )}
+      <CatalogPhoto
+        slug={product.slug}
+        src={src}
+        alt={product.name}
+        fill={fill}
+        width={width}
+        height={height}
+        priority={priority}
+        className={cn(fill ? "object-cover" : "h-auto w-full object-cover", imageClassName)}
+        sizes={sizes}
+        onError={() => setSrc(fallbackFor(product.type))}
+      />
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-charcoal/90 via-charcoal/40 to-transparent p-3 pt-10">
         <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-charcoal px-3 py-1.5">

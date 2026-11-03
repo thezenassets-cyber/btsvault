@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 import type { Product } from "@/lib/types";
 import { PriceTaggedImage } from "@/components/catalog/price-tagged-image";
+import { CatalogPhoto } from "@/components/catalog/catalog-photo";
 import { cn } from "@/lib/utils";
 
 export function ProductGallery({ product, eraStripClass }: { product: Product; eraStripClass?: string }) {
@@ -37,7 +37,7 @@ export function ProductGallery({ product, eraStripClass }: { product: Product; e
                 i === active ? "border-purple-glow" : "border-white/10 hover:border-white/30"
               )}
             >
-              <Image src={src} alt="" fill className="object-cover" sizes="64px" />
+              <CatalogPhoto slug={product.slug} src={src} alt="" fill className="object-cover" sizes="64px" />
             </button>
           ))}
         </div>

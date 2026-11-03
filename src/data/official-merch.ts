@@ -8,7 +8,7 @@ export const officialMerch: Product[] = [
     id: "lightstick-ver4",
     slug: "bts-official-light-stick-ver4",
     name: "BTS Official Light Stick Ver.4",
-    description: "Official ARMY Bomb Ver.4 with Bluetooth sync and redesigned crystal core. Weverse Shop consignment item.",
+    description: "Light Stick Ver.4, made November 2025. Clear spherical head on a short grip, about 9.3 × 9.3 × 21.8 cm, ABS and PC, with strap and dust bag. AAA batteries are not included.",
     type: "lightstick",
     era: "proof",
     members: ["ot7"],

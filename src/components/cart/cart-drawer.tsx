@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { CatalogPhoto } from "@/components/catalog/catalog-photo";
 import Link from "next/link";
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { cartLineKey, lineUnitPrice, useCart } from "@/components/cart/cart-context";
@@ -116,7 +116,8 @@ export function CartDrawer() {
                       return (
                         <li key={key} className="flex gap-3">
                           <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-charcoal">
-                            <Image
+                            <CatalogPhoto
+                              slug={product?.slug}
                               src={image}
                               alt={title}
                               fill

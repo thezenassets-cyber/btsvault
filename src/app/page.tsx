@@ -13,6 +13,7 @@ import { Sparkles, BookOpen, Heart, Users, MapPin } from "lucide-react";
 import { formatPrice, formatDate } from "@/lib/utils";
 import { getProductPrice } from "@/lib/catalog";
 import { Badge } from "@/components/ui/badge";
+import { CatalogPhoto } from "@/components/catalog/catalog-photo";
 
 export default function HomePage() {
   const featured = getFeaturedProducts(12);
@@ -87,7 +88,8 @@ export default function HomePage() {
                 className="group relative overflow-hidden rounded-3xl border border-purple-light/20"
               >
                 <div className="relative aspect-[16/10]">
-                  <Image
+                  <CatalogPhoto
+                    slug={scentOfWeek.slug}
                     src={scentOfWeek.image}
                     alt={scentOfWeek.name}
                     fill
@@ -116,7 +118,8 @@ export default function HomePage() {
                 className="group relative overflow-hidden rounded-3xl border border-gold/20"
               >
                 <div className="relative aspect-[16/10]">
-                  <Image
+                  <CatalogPhoto
+                    slug={membership.slug}
                     src={membership.image}
                     alt={membership.name}
                     fill

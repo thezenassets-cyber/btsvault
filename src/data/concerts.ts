@@ -947,6 +947,17 @@ const concertSchedule: Concert[] = [
     region: "asia",
     status: "upcoming",
     image: "/concerts/arirang-hero.jpg",
+  },
+  {
+    id: "arirang-bulacan-2027-03-16",
+    date: "2027-03-16",
+    city: "Bulacan",
+    country: "Philippines",
+    venue: "Philippine Sports Stadium",
+    tourName: "ARIRANG",
+    region: "asia",
+    status: "upcoming",
+    image: "/concerts/arirang-hero.jpg",
   }
 ];
 

@@ -44,7 +44,7 @@ export function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
     <div className="mx-auto max-w-md rounded-2xl glass p-8">
       <h1 className="text-2xl font-bold text-cream">Admin Gate</h1>
       <p className="mt-2 text-sm text-cream/50">
-        Enter the gate code to manage the box office, applications, and email templates.
+        Enter the gate code to manage the box office, catalog photos, applications, and email templates.
       </p>
       <form
         className="mt-6 space-y-4"
@@ -108,6 +108,11 @@ export function AdminShell({
           <Link href="/admin/box-office">
             <Button variant="secondary" size="sm">
               Box office
+            </Button>
+          </Link>
+          <Link href="/admin/catalog">
+            <Button variant="secondary" size="sm">
+              Catalog photos
             </Button>
           </Link>
           <Link href="/admin/applications">

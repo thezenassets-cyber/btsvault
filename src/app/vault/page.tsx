@@ -11,6 +11,7 @@ import { getEraCompletion, getMemberCompletion } from "@/lib/catalog";
 import { cn, formatDate, formatPrice } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CatalogPhoto } from "@/components/catalog/catalog-photo";
 import { getEraName } from "@/data/eras";
 import type { ShopMemberId } from "@/lib/types";
 import { ClientCard } from "@/components/client-card/client-card";
@@ -245,7 +246,8 @@ export default function VaultPage() {
             {vaultProducts.map(({ item, product }) => (
               <div key={product.id} className="overflow-hidden rounded-2xl glass">
                 <Link href={`/products/${product.slug}`} className="relative block aspect-video">
-                  <Image
+                  <CatalogPhoto
+                    slug={product.slug}
                     src={product.image}
                     alt={product.name}
                     fill
