@@ -8,12 +8,15 @@ export function TawkWidget() {
       {`
         var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
         Tawk_API.customStyle = {
+          zIndex: 55,
           visibility: {
             desktop: { position: "br", xOffset: 20, yOffset: 20 },
             mobile: { position: "br", xOffset: 12, yOffset: 72 }
           }
         };
         (function () {
+          if (window.__armyVaultTawk || document.querySelector('script[src*="embed.tawk.to"]')) return;
+          window.__armyVaultTawk = true;
           var s1 = document.createElement("script");
           var s0 = document.getElementsByTagName("script")[0];
           s1.async = true;

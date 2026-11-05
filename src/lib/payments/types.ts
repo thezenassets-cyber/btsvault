@@ -64,14 +64,20 @@ export type CheckoutPayload = {
   subtotal: number;
   currency: string;
   clientCardNumber?: string;
+  /** Chat desk holds the order. Stripe can replace this later. */
+  channel?: "tawk" | "card";
 };
 
 /** Shipping follows merch only. Seat tickets are digital and do not add a shipping fee. */
 export function quoteTotals(
   items: Order["items"],
   country: string,
-  subtotal: number
+  subtotal: number,
+  options?: { desk?: boolean }
 ) {
+  if (options?.desk) {
+    return { shippingFee: 0, tax: 0, total: Math.round(subtotal * 100) / 100 };
+  }
   const merchSubtotal = items
     .filter((item) => !item.seat)
     .reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);

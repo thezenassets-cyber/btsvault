@@ -3,12 +3,13 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, MessageCircle } from "lucide-react";
 import { useOrders } from "@/components/cart/order-context";
 import { useClientCard } from "@/components/client-card/client-card-context";
 import { ClientCard } from "@/components/client-card/client-card";
 import { admitCode } from "@/data/seating";
 import { formatPrice } from "@/lib/utils";
+import { openPaymentChat, paymentChatMessage, readPaymentChat, type PaymentChatPayload } from "@/lib/support/tawk-checkout";
 import { Button } from "@/components/ui/button";
 import type { Order } from "@/lib/types";
 
@@ -18,12 +19,15 @@ function SuccessInner() {
   const { getOrder, lastOrder, ready } = useOrders();
   const { recordOrderTickets, profile } = useClientCard();
   const [order, setOrder] = useState<Order | null>(null);
+  const [chat, setChat] = useState<PaymentChatPayload | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!ready) return;
     const next = orderId ? getOrder(orderId) ?? lastOrder : lastOrder;
     setOrder(next);
-    if (next) recordOrderTickets(next);
+    if (next && next.status !== "pending") recordOrderTickets(next);
+    setChat(readPaymentChat());
   }, [ready, orderId, getOrder, lastOrder, recordOrderTickets]);
 
   if (!ready) {
@@ -42,16 +46,67 @@ function SuccessInner() {
     );
   }
 
+  const itemCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
+  const waitingOnChat = order.status === "pending";
+  const note =
+    chat && chat.orderId === order.id
+      ? paymentChatMessage(chat)
+      : `ARMY Vault payment\nOrder ${order.id}\nTotal ${formatPrice(order.total)}`;
+
   return (
     <div className="mx-auto max-w-lg px-4 py-16 text-center">
-      <CheckCircle2 className="mx-auto h-14 w-14 text-green-400" />
-      <h1 className="mt-4 text-3xl font-bold text-cream">You&apos;re in, ARMY</h1>
+      {waitingOnChat ? (
+        <MessageCircle className="mx-auto h-14 w-14 text-gold" />
+      ) : (
+        <CheckCircle2 className="mx-auto h-14 w-14 text-green-400" />
+      )}
+      <h1 className="mt-4 text-3xl font-bold text-cream">
+        {waitingOnChat ? "The desk is open" : "You're in, ARMY"}
+      </h1>
       <p className="mt-2 text-cream/60">
-        Order <span className="font-mono text-purple-glow">{order.id}</span> is on your Client Card.
+        Order <span className="font-mono text-purple-glow">{order.id}</span>{" "}
+        {waitingOnChat
+          ? "is in the chat, with the total already written in the box. Send it so the desk can take payment. This page does not charge the Client Card."
+          : "is on your Client Card."}
       </p>
+      {waitingOnChat && (
+        <div className="mt-6">
+          <div className="flex flex-wrap justify-center gap-2">
+            <Button
+              onClick={() =>
+                openPaymentChat(
+                  chat && chat.orderId === order.id
+                    ? chat
+                    : {
+                        orderId: order.id,
+                        name: order.shipping.fullName,
+                        email: order.shipping.email,
+                        total: formatPrice(order.total),
+                        items: order.items.map((item) => `${item.quantity} × ${item.name}`).join("\n"),
+                      }
+                )
+              }
+            >
+              Reopen the chat
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                void navigator.clipboard.writeText(note).then(() => setCopied(true));
+              }}
+            >
+              {copied ? "Copied" : "Copy the order"}
+            </Button>
+          </div>
+          <pre className="mt-4 overflow-x-auto rounded-2xl border border-white/10 bg-white/5 p-4 text-left text-xs whitespace-pre-wrap text-cream/70">
+            {note}
+          </pre>
+        </div>
+      )}
       <p className="mt-4 text-2xl font-bold text-cream">{formatPrice(order.total)}</p>
       <p className="mt-1 text-sm text-cream/40">
-        {order.items.length} items · Client Card {order.clientCardNumber || profile.number}
+        {itemCount} {itemCount === 1 ? "item" : "items"} · Client Card{" "}
+        {order.clientCardNumber || profile.number}
       </p>
       <div className="mx-auto mt-8 max-w-sm text-left">
         <ClientCard size="full" />

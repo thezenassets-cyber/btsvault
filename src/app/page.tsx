@@ -14,6 +14,7 @@ import { formatPrice, formatDate } from "@/lib/utils";
 import { getProductPrice } from "@/lib/catalog";
 import { Badge } from "@/components/ui/badge";
 import { CatalogPhoto } from "@/components/catalog/catalog-photo";
+import { SuperUpgrades } from "@/components/vault/super-upgrades";
 
 export default function HomePage() {
   const featured = getFeaturedProducts(12);
@@ -31,6 +32,7 @@ export default function HomePage() {
       <HeroSection />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <SuperUpgrades />
         <ShopByMemberSection />
 
         <div className="py-10">

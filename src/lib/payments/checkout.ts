@@ -17,7 +17,8 @@ export async function submitCheckout(
   const { shippingFee, tax, total } = quoteTotals(
     body.items,
     body.shipping.country || "US",
-    body.subtotal
+    body.subtotal,
+    { desk: body.channel === "tawk" }
   );
 
   const payment = await createPaymentIntent({
@@ -27,12 +28,13 @@ export async function submitCheckout(
     customerEmail: body.shipping.email,
   });
 
+  const viaChat = body.channel === "tawk";
   const order: Order = {
     id: orderId,
     createdAt: new Date().toISOString(),
-    status: payment.status === "succeeded" ? "paid_demo" : "pending",
+    status: viaChat ? "pending" : payment.status === "succeeded" ? "paid_demo" : "pending",
     shipping: body.shipping,
-    payment: body.payment,
+    payment: viaChat ? { ...body.payment, brand: "Chat desk" } : body.payment,
     items: body.items,
     subtotal: body.subtotal,
     shippingFee,

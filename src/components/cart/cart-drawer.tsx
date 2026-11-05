@@ -1,6 +1,7 @@
 "use client";
 
 import { CatalogPhoto } from "@/components/catalog/catalog-photo";
+import { useEffect } from "react";
 import Link from "next/link";
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { cartLineKey, lineUnitPrice, useCart } from "@/components/cart/cart-context";
@@ -10,6 +11,8 @@ import type { ShopMemberId } from "@/lib/types";
 import { isShopMember } from "@/data/members";
 import { getProductById } from "@/data/products";
 import { admitCode } from "@/data/seating";
+import { SuperUpgrades } from "@/components/vault/super-upgrades";
+import { tuckPaymentChat } from "@/lib/support/tawk-checkout";
 
 export function CartDrawer() {
   const {
@@ -22,6 +25,10 @@ export function CartDrawer() {
     removeFromCart,
     clearMemberCart,
   } = useCart();
+
+  useEffect(() => {
+    if (isOpen) tuckPaymentChat();
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -182,8 +189,9 @@ export function CartDrawer() {
               <span className="text-cream/60">Grand Total</span>
               <span className="text-xl font-bold text-cream">{formatPrice(grandTotal)}</span>
             </div>
-            <Link href="/checkout" onClick={closeCart}>
-              <Button className="w-full">Checkout</Button>
+            <SuperUpgrades compact />
+            <Link href="/checkout" onClick={closeCart} className="mt-4 block">
+              <Button className="w-full">Pay in chat · {formatPrice(grandTotal)}</Button>
             </Link>
             <Link href="/members" onClick={closeCart}>
               <Button variant="outline" className="mt-2 w-full">

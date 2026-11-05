@@ -21,7 +21,12 @@ interface CartContextValue {
   openCart: () => void;
   closeCart: () => void;
   toggleCart: () => void;
-  addToCart: (productId: string, quantity?: number, selectedSize?: import("@/lib/types").ApparelSize) => void;
+  addToCart: (
+    productId: string,
+    quantity?: number,
+    selectedSize?: import("@/lib/types").ApparelSize,
+    options?: { open?: boolean }
+  ) => void;
   addSeat: (seat: SeatHold) => void;
   removeFromCart: (key: string) => void;
   updateQuantity: (key: string, quantity: number) => void;
@@ -93,7 +98,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [items, loaded]);
 
   const addToCart = useCallback(
-    (productId: string, quantity = 1, selectedSize?: import("@/lib/types").ApparelSize) => {
+    (
+      productId: string,
+      quantity = 1,
+      selectedSize?: import("@/lib/types").ApparelSize,
+      options?: { open?: boolean }
+    ) => {
       setItems((prev) => {
         const existing = prev.find(
           (i) => i.productId === productId && i.selectedSize === selectedSize
@@ -115,7 +125,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           },
         ];
       });
-      setIsOpen(true);
+      if (options?.open !== false) setIsOpen(true);
     },
     []
   );
