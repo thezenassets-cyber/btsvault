@@ -16,6 +16,8 @@ import { getEraName } from "@/data/eras";
 import type { ShopMemberId } from "@/lib/types";
 import { ClientCard } from "@/components/client-card/client-card";
 import { useClientCard } from "@/components/client-card/client-card-context";
+import { useOrders } from "@/components/cart/order-context";
+import { useI18n } from "@/lib/i18n/provider";
 import { admitCode } from "@/data/seating";
 
 type VaultTab = "collection" | "era" | "member";
@@ -23,28 +25,28 @@ type VaultTab = "collection" | "era" | "member";
 export default function VaultPage() {
   const { items, removeItem, ownedIds } = useVault();
   const vaultProducts = useVaultProducts();
-  const { stubs } = useClientCard();
+  const { stubs, profile } = useClientCard();
+  const { orders } = useOrders();
+  const { t } = useI18n();
+  const holds = orders.filter((order) => order.clientCardNumber === profile.number);
   const [tab, setTab] = useState<VaultTab>("collection");
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-cream sm:text-4xl">My Vault</h1>
-          <p className="mt-2 text-cream/50">
-            Your Client Card, ticket stubs, and the merch you have collected — {items.length} item
-            {items.length !== 1 ? "s" : ""}.
-          </p>
+          <h1 className="text-3xl font-bold text-cream sm:text-4xl">{t("vault.title")}</h1>
+          <p className="mt-2 text-cream/50">{t("vault.lead")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Link href="/members">
             <Button variant="secondary">
-              <Users className="h-4 w-4" /> Member Shops
+              <Users className="h-4 w-4" /> {t("vault.shops")}
             </Button>
           </Link>
           <Link href="/explore">
             <Button variant="outline">
-              <Plus className="h-4 w-4" /> Add Items
+              <Plus className="h-4 w-4" /> {t("vault.add")}
             </Button>
           </Link>
         </div>
@@ -53,17 +55,39 @@ export default function VaultPage() {
       <div className="mb-10 grid gap-6 lg:grid-cols-[minmax(0,22rem)_1fr] lg:items-start">
         <ClientCard size="full" editable />
         <div>
-          <h2 className="font-display text-xl font-bold text-cream">Ticket stubs</h2>
-          <p className="mt-1 text-sm text-cream/50">
-            Seats you have checked out stay on this card.
-          </p>
+          <h2 className="font-display text-xl font-bold text-cream">{t("vault.holds")}</h2>
+          <p className="mt-1 text-sm text-cream/50">{t("vault.lead")}</p>
+          {holds.length === 0 ? (
+            <p className="mt-4 text-sm text-cream/40">{t("vault.noHolds")}</p>
+          ) : (
+            <ul className="mt-4 space-y-3">
+              {holds.map((order) => (
+                <li key={order.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="font-mono text-[11px] text-gold">{order.id}</p>
+                      <p className="mt-1 text-sm font-medium text-cream">{order.items[0]?.name}</p>
+                      {order.items[0]?.stay?.hotel && (
+                        <p className="mt-1 text-xs text-cream/50">{order.items[0].stay.hotel}</p>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold text-cream">{formatPrice(order.total)}</p>
+                      <p className="mt-1 text-[11px] tracking-wide text-cream/40 uppercase">{t("vault.held")}</p>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+          <h2 className="mt-10 font-display text-xl font-bold text-cream">{t("vault.stubs")}</h2>
+          <p className="mt-1 text-sm text-cream/50">{t("vault.stubsLead")}</p>
           {stubs.length === 0 ? (
             <p className="mt-4 text-sm text-cream/40">
-              No seats yet.{" "}
+              {t("vault.noSeats")}{" "}
               <Link href="/box-office" className="text-purple-glow hover:text-cream">
-                Open the box office
+                {t("vault.box")}
               </Link>
-              .
             </p>
           ) : (
             <ul className="mt-4 space-y-3">
@@ -111,9 +135,9 @@ export default function VaultPage() {
       <div className="mb-8 flex flex-wrap gap-2">
         {(
           [
-            { id: "collection" as const, label: "My Items" },
-            { id: "era" as const, label: "By Era" },
-            { id: "member" as const, label: "By Member" },
+            { id: "collection" as const, label: t("vault.items") },
+            { id: "era" as const, label: t("vault.era") },
+            { id: "member" as const, label: t("vault.member") },
           ] as const
         ).map((t) => (
           <button

@@ -13,8 +13,10 @@ import { getProductById } from "@/data/products";
 import { admitCode } from "@/data/seating";
 import { SuperUpgrades } from "@/components/vault/super-upgrades";
 import { tuckPaymentChat } from "@/lib/support/tawk-checkout";
+import { useI18n } from "@/lib/i18n/provider";
 
 export function CartDrawer() {
+  const { t } = useI18n();
   const {
     isOpen,
     closeCart,
@@ -42,12 +44,12 @@ export function CartDrawer() {
       <aside
         className="fixed right-0 top-0 z-[70] flex h-dvh w-full flex-col border-l border-white/10 bg-charcoal-soft shadow-2xl sm:max-w-md"
         role="dialog"
-        aria-label="Shopping cart"
+        aria-label={t("nav.cart")}
       >
         <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-5 py-4 pt-[max(1rem,env(safe-area-inset-top))]">
           <div className="flex items-center gap-2">
             <ShoppingBag className="h-5 w-5 text-purple-glow" />
-            <h2 className="text-lg font-semibold text-cream">Your Cart</h2>
+            <h2 className="text-lg font-semibold text-cream">{t("cart.title")}</h2>
             <span className="rounded-full bg-purple-main/30 px-2 py-0.5 text-xs text-purple-glow">
               {itemCount}
             </span>
@@ -55,7 +57,7 @@ export function CartDrawer() {
           <button
             onClick={closeCart}
             className="rounded-full p-2 text-cream/60 hover:bg-white/5 hover:text-cream"
-            aria-label="Close cart"
+            aria-label={t("cart.close")}
           >
             <X className="h-5 w-5" />
           </button>
@@ -65,9 +67,9 @@ export function CartDrawer() {
           {groupedItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <ShoppingBag className="mb-4 h-12 w-12 text-cream/20" />
-              <p className="text-cream/60">Your cart is empty</p>
+              <p className="text-cream/60">{t("cart.empty")}</p>
               <Link href="/members" onClick={closeCart} className="mt-4">
-                <Button size="sm">Shop by Member</Button>
+                <Button size="sm">{t("cart.shopMembers")}</Button>
               </Link>
             </div>
           ) : (
@@ -190,20 +192,20 @@ export function CartDrawer() {
         {groupedItems.length > 0 && (
           <div className="border-t border-white/10 p-5">
             <div className="mb-4 flex items-center justify-between">
-              <span className="text-cream/60">Grand Total</span>
+              <span className="text-cream/60">{t("cart.total")}</span>
               <span className="text-xl font-bold text-cream">{formatPrice(grandTotal)}</span>
             </div>
             <SuperUpgrades compact />
             <Link href="/checkout" onClick={closeCart} className="mt-4 block">
-              <Button className="w-full">Checkout · {formatPrice(grandTotal)}</Button>
+              <Button className="w-full">{t("cart.checkout")} · {formatPrice(grandTotal)}</Button>
             </Link>
             <Link href="/members" onClick={closeCart}>
               <Button variant="outline" className="mt-2 w-full">
-                Shop More Members
+                {t("cart.more")}
               </Button>
             </Link>
             <p className="mt-3 text-center text-xs text-cream/40">
-              Invite a friend to complete a member set together.
+              {t("cart.invite")}
             </p>
           </div>
         )}

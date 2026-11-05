@@ -14,10 +14,10 @@ export function formatPrice(amount: number, currency = "USD") {
   }).format(amount);
 }
 
-export function formatDate(date: string) {
+export function formatDate(date: string, locale = "en-US") {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return "";
   const [year, month, day] = date.split("-").map(Number);
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(locale, {
     month: "short",
     day: "numeric",
     year: "numeric",

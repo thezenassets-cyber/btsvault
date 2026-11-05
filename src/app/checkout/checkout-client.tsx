@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { CatalogPhoto } from "@/components/catalog/catalog-photo";
 import { resolveProductPhoto } from "@/lib/product-images";
 import { Input } from "@/components/ui/input";
+import { useI18n } from "@/lib/i18n/provider";
 
 function placeLabel(city: string, date: string) {
   const when = formatDate(date);
@@ -29,6 +30,7 @@ export function CheckoutClient() {
   const { items, ready, grandTotal, clearCart } = useCart();
   const { saveOrder } = useOrders();
   const { profile, ready: cardReady } = useClientCard();
+  const { t } = useI18n();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -183,17 +185,17 @@ export function CheckoutClient() {
   }
 
   if (!ready) {
-    return <div className="px-4 py-24 text-center text-cream/50">Loading your cart…</div>;
+    return <div className="px-4 py-24 text-center text-cream/50">{t("out.loading")}</div>;
   }
 
   if (items.length === 0) {
     return (
       <div className="mx-auto max-w-lg px-4 py-24 text-center">
         <ShoppingBag className="mx-auto mb-4 h-12 w-12 text-cream/30" />
-        <h1 className="text-2xl font-bold text-cream">Your cart is empty</h1>
-        <p className="mt-2 text-cream/50">Add what you want, then come back to confirm.</p>
+        <h1 className="text-2xl font-bold text-cream">{t("out.emptyTitle")}</h1>
+        <p className="mt-2 text-cream/50">{t("out.empty")}</p>
         <Link href="/" className="mt-6 inline-block">
-          <Button>Open the floor</Button>
+          <Button>{t("out.floor")}</Button>
         </Link>
       </div>
     );
@@ -201,15 +203,13 @@ export function CheckoutClient() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-      <h1 className="font-display text-3xl font-bold text-cream">Checkout</h1>
-      <p className="mt-1 text-sm text-cream/50">
-        Confirm the hold. Your card is not charged on this page.
-      </p>
+      <h1 className="font-display text-3xl font-bold text-cream">{t("out.checkout")}</h1>
+      <p className="mt-1 text-sm text-cream/50">{t("out.lead")}</p>
 
       <div className="mt-8 grid min-w-0 gap-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
         <div className="min-w-0 space-y-6">
           <section className="rounded-2xl glass p-6">
-            <h2 className="mb-4 text-lg font-semibold text-cream">On your card</h2>
+            <h2 className="mb-4 text-lg font-semibold text-cream">{t("out.onCard")}</h2>
             <div className="space-y-6">
               {checkoutGroups.shows.map((group) => (
                 <div key={group.label}>
@@ -238,14 +238,14 @@ export function CheckoutClient() {
         <aside className="h-fit space-y-4">
           <ClientCard size="full" />
           <div className="rounded-2xl border border-gold/30 bg-white/5 p-6">
-            <h2 className="text-sm font-semibold tracking-wider text-gold uppercase">Your details</h2>
+            <h2 className="text-sm font-semibold tracking-wider text-gold uppercase">{t("out.details")}</h2>
             <div className="mt-4 space-y-3">
               <label className="block text-xs text-cream/50">
-                Name
+                {t("out.name")}
                 <Input className="mt-1" value={name} onChange={(event) => setName(event.target.value)} />
               </label>
               <label className="block text-xs text-cream/50">
-                Email
+                {t("out.email")}
                 <Input
                   className="mt-1"
                   type="email"
@@ -255,23 +255,23 @@ export function CheckoutClient() {
                 />
               </label>
               <label className="block text-xs text-cream/50">
-                Phone
+                {t("out.phone")}
                 <Input className="mt-1" value={phone} onChange={(event) => setPhone(event.target.value)} />
               </label>
             </div>
             <dl className="mt-4 space-y-2 text-sm">
               <div className="flex justify-between border-t border-white/10 pt-3 text-base font-bold">
-                <dt className="text-cream">On your card</dt>
+                <dt className="text-cream">{t("out.onCard")}</dt>
                 <dd className="text-cream">{formatPrice(total)}</dd>
               </div>
             </dl>
-            <p className="mt-2 text-xs text-cream/45">Shipping and tax are settled after this step, not added here.</p>
+            <p className="mt-2 text-xs text-cream/45">{t("out.ship")}</p>
             {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
             <Button className="mt-5 w-full" onClick={placeOrder} disabled={submitting}>
-              {submitting ? "Confirming…" : `Confirm · ${formatPrice(total)}`}
+              {submitting ? t("out.confirming") : `${t("out.confirm")} · ${formatPrice(total)}`}
             </Button>
             <p className="mt-3 text-xs text-cream/40">
-              Client Card {cardReady ? profile.number : ""}. Your card is not charged on this page.
+              {cardReady ? profile.number : ""}. {t("out.cardNote")}
             </p>
           </div>
         </aside>
@@ -281,6 +281,7 @@ export function CheckoutClient() {
 }
 
 function CheckoutLine({ item }: { item: OrderLineItem }) {
+  const { t } = useI18n();
   const code = item.seat
     ? admitCode(item.seat.concertId, item.seat.sectionId, item.seat.row, item.seat.seat)
     : null;
@@ -301,7 +302,14 @@ function CheckoutLine({ item }: { item: OrderLineItem }) {
         <p className="text-sm font-medium text-cream">
           {code && item.name.startsWith(`${code} · `) ? item.name.slice(code.length + 3) : item.name}
         </p>
-        <p className="text-xs text-cream/50">Qty {item.quantity}</p>
+        <p className="text-xs text-cream/50">{t("out.qty")} {item.quantity}</p>
+        {item.stay?.includes && item.stay.includes.length > 0 && (
+          <ul className="mt-2 space-y-1 text-xs leading-relaxed text-cream/55">
+            {item.stay.includes.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        )}
       </div>
       <p className="text-sm font-semibold text-cream">{formatPrice(item.unitPrice * item.quantity)}</p>
     </li>

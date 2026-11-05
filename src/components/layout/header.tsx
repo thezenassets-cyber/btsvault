@@ -10,21 +10,24 @@ import { useCart } from "@/components/cart/cart-context";
 import { CartDrawer } from "@/components/cart/cart-drawer";
 import { InviteArmyButton } from "@/components/invite/invite-army";
 import { ClientCard } from "@/components/client-card/client-card";
+import { useI18n } from "@/lib/i18n/provider";
+import type { MessageKey } from "@/lib/i18n/catalog";
 
-const navLinks = [
-  { href: "/explore", label: "Merch" },
-  { href: "/box-office", label: "Box Office" },
-  { href: "/members", label: "Members" },
-  { href: "/concerts", label: "Concerts" },
-  { href: "/vault", label: "My Vault" },
-  { href: "/experiences", label: "Experiences" },
-  { href: "/research", label: "Research" },
+const navLinks: { href: string; key: MessageKey }[] = [
+  { href: "/explore", key: "nav.merch" },
+  { href: "/box-office", key: "nav.box" },
+  { href: "/members", key: "nav.members" },
+  { href: "/concerts", key: "nav.concerts" },
+  { href: "/vault", key: "nav.vault" },
+  { href: "/experiences", key: "nav.experiences" },
+  { href: "/research", key: "nav.research" },
 ];
 
 export function Header() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { toggleCart, closeCart, itemCount } = useCart();
+  const { t } = useI18n();
 
   function onMenuClick() {
     setMobileOpen((open) => {
@@ -67,13 +70,13 @@ export function Header() {
                     : "text-cream/70 hover:bg-white/5 hover:text-cream"
                 )}
               >
-                {link.label}
+                {t(link.key)}
               </Link>
             ))}
           </nav>
 
           <div className="flex shrink-0 items-center gap-0.5 sm:gap-2">
-            <Link href="/vault" className="hidden lg:inline-flex" aria-label="Your Client Card">
+            <Link href="/vault" className="hidden lg:inline-flex" aria-label={t("nav.card")}>
               <ClientCard size="chip" />
             </Link>
             <div className="hidden 2xl:block">
@@ -82,21 +85,21 @@ export function Header() {
             <Link
               href="/explore"
               className="hidden rounded-full p-2 text-cream/70 transition-colors hover:bg-white/5 hover:text-cream lg:flex"
-              aria-label="Search"
+              aria-label={t("nav.search")}
             >
               <Search className="h-5 w-5" />
             </Link>
             <Link
               href="/vault"
               className="rounded-full p-2 text-cream/70 transition-colors hover:bg-white/5 hover:text-cream"
-              aria-label="My Vault"
+              aria-label={t("nav.vault")}
             >
               <Heart className="h-5 w-5" />
             </Link>
             <button
               onClick={onCartClick}
               className="relative rounded-full p-2 text-cream/70 transition-colors hover:bg-white/5 hover:text-cream"
-              aria-label="Shopping cart"
+              aria-label={t("nav.cart")}
             >
               <ShoppingBag className="h-5 w-5" />
               {itemCount > 0 && (
@@ -108,7 +111,7 @@ export function Header() {
             <button
               className="rounded-full p-2 text-cream/70 xl:hidden"
               onClick={onMenuClick}
-              aria-label="Menu"
+              aria-label={t("nav.menu")}
               aria-expanded={mobileOpen}
             >
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -130,7 +133,7 @@ export function Header() {
                     : "text-cream/70"
                 )}
               >
-                {link.label}
+                {t(link.key)}
               </Link>
             ))}
           </nav>

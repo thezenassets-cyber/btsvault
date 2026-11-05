@@ -6,13 +6,13 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import type { CartItem, CityStayHold, SeatHold, ShopMemberId } from "@/lib/types";
 import { getProductById, getProductPrimaryMember } from "@/data/products";
 import { getProductPrice } from "@/lib/catalog";
-
-const STORAGE_KEY = "army-vault-cart";
+import { CARD_EVENT, CARTS_KEY, readStoredCard } from "@/lib/ledger";
 
 interface CartContextValue {
   items: CartItem[];
@@ -79,24 +79,65 @@ function matchesKey(item: CartItem, key: string) {
   return item.productId === key;
 }
 
+function readCarts(): Record<string, CartItem[]> {
+  try {
+    const raw = localStorage.getItem(CARTS_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) return parsed;
+  } catch {
+    /* ignore */
+  }
+  return {};
+}
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const cardRef = useRef<string | null>(null);
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) setItems(JSON.parse(stored));
-    } catch {
-      /* ignore */
+    function adopt(card: string) {
+      const carts = readCarts();
+      if (cardRef.current && cardRef.current !== card) {
+        carts[cardRef.current] = itemsRef.current;
+        localStorage.setItem(CARTS_KEY, JSON.stringify(carts));
+      }
+      if (!carts[card]) {
+        try {
+          const legacy = localStorage.getItem("army-vault-cart");
+          const parsed = legacy ? JSON.parse(legacy) : null;
+          if (Array.isArray(parsed)) {
+            carts[card] = parsed;
+            localStorage.setItem(CARTS_KEY, JSON.stringify(carts));
+            localStorage.removeItem("army-vault-cart");
+          }
+        } catch {
+          /* ignore */
+        }
+      }
+      cardRef.current = card;
+      setItems(carts[card] ?? []);
+      setLoaded(true);
     }
-    setLoaded(true);
+
+    const existing = readStoredCard();
+    if (existing) adopt(existing);
+    const onCard = (event: Event) => {
+      const number = (event as CustomEvent<string>).detail;
+      if (number) adopt(number);
+    };
+    window.addEventListener(CARD_EVENT, onCard);
+    return () => window.removeEventListener(CARD_EVENT, onCard);
   }, []);
 
   useEffect(() => {
-    if (!loaded) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    if (!loaded || !cardRef.current) return;
+    const carts = readCarts();
+    carts[cardRef.current] = items;
+    localStorage.setItem(CARTS_KEY, JSON.stringify(carts));
   }, [items, loaded]);
 
   const addToCart = useCallback(
@@ -180,7 +221,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) => {
       if (quantity < 1) return prev.filter((item) => !matchesKey(item, key));
       return prev.map((item) => {
-        if (!matchesKey(item, key) || item.seat) return item;
+        if (!matchesKey(item, key) || item.seat || item.stay) return item;
         return { ...item, quantity };
       });
     });
@@ -192,7 +233,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = useCallback(() => {
     setItems([]);
-    localStorage.setItem(STORAGE_KEY, "[]");
+    if (!cardRef.current) return;
+    const carts = readCarts();
+    carts[cardRef.current] = [];
+    localStorage.setItem(CARTS_KEY, JSON.stringify(carts));
   }, []);
 
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);

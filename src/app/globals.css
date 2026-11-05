@@ -14,8 +14,8 @@
   --color-era-be: #e8e0d5;
   --color-era-proof: #1a1a1a;
 
-  --font-display: var(--font-inter), "Inter", "Segoe UI", system-ui, sans-serif;
-  --font-body: var(--font-dm), "DM Sans", "Segoe UI", system-ui, sans-serif;
+  --font-display: var(--font-inter), "Inter", "Segoe UI", "Malgun Gothic", "Yu Gothic", "Microsoft JhengHei", "Leelawadee UI", system-ui, sans-serif;
+  --font-body: var(--font-dm), "DM Sans", "Segoe UI", "Malgun Gothic", "Yu Gothic", "Microsoft JhengHei", "Leelawadee UI", system-ui, sans-serif;
 }
 
 @layer base {

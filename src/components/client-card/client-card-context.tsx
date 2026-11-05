@@ -11,8 +11,8 @@ import {
 import type { ClientCardProfile, ClientTier, Order, TicketStub } from "@/lib/types";
 import { useVault } from "@/components/vault/vault-context";
 import { useOrders } from "@/components/cart/order-context";
+import { announceCard, PROFILE_KEY } from "@/lib/ledger";
 
-const PROFILE_KEY = "army-vault-client-card";
 const STUBS_KEY = "army-vault-ticket-stubs";
 
 const PLACEHOLDER: ClientCardProfile = {
@@ -74,14 +74,17 @@ export function ClientCardProvider({ children }: { children: React.ReactNode }) 
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
+    let next = freshProfile();
     try {
       const storedProfile = localStorage.getItem(PROFILE_KEY);
-      setProfile(storedProfile ? JSON.parse(storedProfile) : freshProfile());
+      if (storedProfile) next = JSON.parse(storedProfile);
       const storedStubs = localStorage.getItem(STUBS_KEY);
       if (storedStubs) setStubs(JSON.parse(storedStubs));
     } catch {
-      setProfile(freshProfile());
+      next = freshProfile();
     }
+    setProfile(next);
+    if (next.number) announceCard(next.number);
     setLoaded(true);
   }, []);
 
@@ -139,14 +142,22 @@ export function ClientCardProvider({ children }: { children: React.ReactNode }) 
     [profile]
   );
 
+  const mineOrders = useMemo(
+    () => (profile.issuedAt ? orders.filter((order) => order.clientCardNumber === profile.number) : []),
+    [orders, profile.issuedAt, profile.number]
+  );
+  const mineStubs = useMemo(
+    () => (profile.issuedAt ? stubs.filter((stub) => stub.clientCardNumber === profile.number) : []),
+    [stubs, profile.issuedAt, profile.number]
+  );
   const tier = useMemo(
-    () => deriveTier(ownedIds, orders, stubs),
-    [ownedIds, orders, stubs]
+    () => deriveTier(ownedIds, mineOrders, mineStubs),
+    [ownedIds, mineOrders, mineStubs]
   );
 
   const value = useMemo<ClientCardContextValue>(
-    () => ({ profile, tier, stubs, ready: loaded, setHolderName, recordOrderTickets }),
-    [profile, tier, stubs, loaded, setHolderName, recordOrderTickets]
+    () => ({ profile, tier, stubs: mineStubs, ready: loaded, setHolderName, recordOrderTickets }),
+    [profile, tier, mineStubs, loaded, setHolderName, recordOrderTickets]
   );
 
   return <ClientCardContext.Provider value={value}>{children}</ClientCardContext.Provider>;

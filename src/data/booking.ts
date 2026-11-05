@@ -1,37 +1,46 @@
-import { getProductById } from "@/data/products";
-import { getPrivateAccess } from "@/data/private-access";
-import { getProductPrice } from "@/lib/catalog";
-
 export type BookingLane = "meet" | "reserve" | "vacation";
 
-export const STAY_RATES = [
-  { nights: 2, price: 420, label: "2 nights" },
-  { nights: 3, price: 590, label: "3 nights" },
-  { nights: 5, price: 890, label: "5 nights" },
-] as const;
-
-export type StayNights = (typeof STAY_RATES)[number]["nights"];
-
-export function gaListPrice() {
-  const product = getProductById("ticket-ga-1");
-  return product ? getProductPrice(product) : 199;
+export interface BookingBudget {
+  id: string;
+  lane: BookingLane;
+  /** One member, one guest, or the whole stay. USD list price. */
+  price: number;
+  /** Meet & Greet with all seven. */
+  groupPrice?: number;
+  nights?: number;
+  needsMember: boolean;
 }
 
-export function vipListPrice() {
-  const product = getProductById("ticket-vip-1");
-  return product ? getProductPrice(product) : 449;
+/**
+ * One price list for every member.
+ * A reservation multiplies by the party. A meet with all seven uses groupPrice.
+ * The number on the card is the number at checkout.
+ */
+export const BOOKING_BUDGETS: BookingBudget[] = [
+  { id: "greeting", lane: "meet", price: 3200, groupPrice: 12800, needsMember: true },
+  { id: "private", lane: "meet", price: 7500, groupPrice: 28000, needsMember: true },
+  { id: "evening", lane: "meet", price: 15000, groupPrice: 48000, needsMember: true },
+  { id: "house", lane: "reserve", price: 650, needsMember: false },
+  { id: "floor", lane: "reserve", price: 1450, needsMember: false },
+  { id: "row", lane: "reserve", price: 3200, needsMember: false },
+  { id: "two", lane: "vacation", price: 2400, nights: 2, needsMember: false },
+  { id: "four", lane: "vacation", price: 4800, nights: 4, needsMember: false },
+  { id: "five", lane: "vacation", price: 9600, nights: 5, needsMember: true },
+];
+
+export function budgetsFor(lane: BookingLane) {
+  return BOOKING_BUDGETS.filter((budget) => budget.lane === lane);
 }
 
-export function meetMemberOffer() {
-  return getPrivateAccess("meet-greet");
+export function budgetById(id: string) {
+  return BOOKING_BUDGETS.find((budget) => budget.id === id);
 }
 
-export function meetGroupOffer() {
-  return getPrivateAccess("meet-greet-ot7");
-}
-
-export function stayRate(nights: number) {
-  return STAY_RATES.find((rate) => rate.nights === nights) ?? STAY_RATES[0];
+/** The amount this card will show. Party size applies only to a reservation. */
+export function budgetTotal(budget: BookingBudget, party: number, allSeven: boolean) {
+  const each = allSeven && budget.groupPrice ? budget.groupPrice : budget.price;
+  if (budget.lane === "reserve") return each * Math.min(8, Math.max(1, party));
+  return each;
 }
 
 export function isBookingLane(value: string | null): value is BookingLane {

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { Inter, DM_Sans } from "next/font/google";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -9,6 +10,8 @@ import { VaultProvider } from "@/components/vault/vault-context";
 import { CartProvider } from "@/components/cart/cart-context";
 import { OrderProvider } from "@/components/cart/order-context";
 import { ClientCardProvider } from "@/components/client-card/client-card-context";
+import { LocaleProvider } from "@/lib/i18n/provider";
+import { HTML_LANG, matchLocale } from "@/lib/i18n/locale";
 import "./globals.css";
 
 const inter = Inter({
@@ -38,11 +41,14 @@ export const viewport: Viewport = {
   themeColor: "#1a1a1a",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const headerList = await headers();
+  const locale = matchLocale(headerList.get("accept-language"));
   return (
-    <html lang="en" className={`${inter.variable} ${dmSans.variable}`}>
+    <html lang={HTML_LANG[locale]} className={`${inter.variable} ${dmSans.variable}`}>
       <body className="min-h-screen">
         <PageLoader />
+        <LocaleProvider locale={locale}>
         <VaultProvider>
           <CartProvider>
             <OrderProvider>
@@ -56,6 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </OrderProvider>
           </CartProvider>
         </VaultProvider>
+        </LocaleProvider>
       </body>
     </html>
   );

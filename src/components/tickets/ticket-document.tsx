@@ -22,6 +22,7 @@ function bars(value: string) {
 
 function stubFromOrders(id: string, orders: Order[], cardNumber: string): TicketStub | null {
   for (const order of orders) {
+    if (order.clientCardNumber && order.clientCardNumber !== cardNumber) continue;
     for (const item of order.items) {
       if (!item.seat) continue;
       const stubId = `${order.id}:${item.seat.lineId}`;

@@ -8,6 +8,19 @@ import { superUpgrades } from "@/data/upgrades";
 import { getProductById } from "@/data/products";
 import { getProductPrice } from "@/lib/catalog";
 import { formatPrice } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n/provider";
+import type { MessageKey } from "@/lib/i18n/catalog";
+
+const KICKER: Record<string, MessageKey> = {
+  "lightstick-ver4": "up.lightstick",
+  "army-membership-kit": "up.card",
+  "ticket-soundcheck": "up.early",
+  "ticket-ga-1": "up.getin",
+  "ticket-vip-1": "up.move",
+  "ticket-vip-bulk-2": "up.bring",
+  "ticket-bulk-8": "up.row",
+  "incense-arirang": "up.home",
+};
 
 const drops = superUpgrades
   .map((upgrade) => {
@@ -20,6 +33,7 @@ const drops = superUpgrades
 export function LiveFloor() {
   const pathname = usePathname();
   const { addToCart, grandTotal, ready } = useCart();
+  const { t } = useI18n();
   const [spot, setSpot] = useState(0);
   const [shown, setShown] = useState(0);
   const [bump, setBump] = useState(0);
@@ -55,7 +69,7 @@ export function LiveFloor() {
     <div className="sticky top-[4.5rem] z-40 border-b border-gold/20 bg-charcoal">
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2 sm:px-6 lg:px-8">
         <p className="hidden shrink-0 text-[10px] font-semibold tracking-widest text-gold uppercase sm:block">
-          Floor open
+          {t("floor.open")}
         </p>
         <div className="scroll-row flex min-w-0 flex-1 gap-2">
           {drops.map((drop, index) => (
@@ -67,7 +81,7 @@ export function LiveFloor() {
                 index === spot ? "border-gold bg-gold/15 text-cream" : "border-white/10 text-cream/70"
               }`}
             >
-              {drop.kicker} · {formatPrice(drop.price)}
+              {(KICKER[drop.productId] ? t(KICKER[drop.productId]) : drop.kicker)} · {formatPrice(drop.price)}
             </button>
           ))}
         </div>
@@ -78,7 +92,7 @@ export function LiveFloor() {
           }`}
           key={bump}
         >
-          {grandTotal > 0 ? formatPrice(shown > 0 ? shown : grandTotal) : "Checkout"}
+          {grandTotal > 0 ? formatPrice(shown > 0 ? shown : grandTotal) : t("floor.checkout")}
         </Link>
       </div>
     </div>

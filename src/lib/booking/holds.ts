@@ -1,82 +1,41 @@
-import { gaListPrice, vipListPrice, type StayNights } from "@/data/booking";
-import { ROLL_META, seatSections } from "@/data/seating";
-import type { CityStayHold, Concert, PrivateAccessSelection, SeatHold } from "@/lib/types";
+import type { CityStayHold } from "@/lib/types";
 
-export function buildHeldSeat(
-  concert: Concert,
-  tier: "ga" | "vip",
-  index: number,
-  access?: PrivateAccessSelection,
-  hotel?: string
-): SeatHold {
-  const section = seatSections.find((item) => item.id === (tier === "vip" ? "F4L" : "B1"));
-  if (!section) throw new Error("Seat chart is missing the booking section");
-  const seat = index + 1;
-  return {
-    lineId: `${concert.id}-${section.id}-r1-s${seat}`,
-    concertId: concert.id,
-    city: concert.city,
-    country: concert.country,
-    venue: concert.venue,
-    date: concert.date,
-    image: concert.image || "/concerts/arirang-hero.jpg",
-    roll: section.roll,
-    rollLabel: ROLL_META[section.roll].label,
-    sectionId: section.id,
-    sectionLabel: section.label,
-    row: 1,
-    seat,
-    price: tier === "vip" ? vipListPrice() : gaListPrice(),
-    privateAccess: index === 0 ? access : undefined,
-    hotel: index === 0 ? hotel : undefined,
-  };
-}
-
-export function buildCityStay(
-  concert: Concert,
-  nights: StayNights,
-  price: number,
-  hotel: string
-): CityStayHold {
-  return {
-    lineId: `stay-${concert.id}-${nights}`,
-    concertId: concert.id,
-    city: concert.city,
-    country: concert.country,
-    venue: concert.venue,
-    date: concert.date,
-    nights,
-    price,
-    image: concert.image || "/concerts/arirang-hero.jpg",
-    title: `${concert.city} · ${nights} nights · ${hotel}`,
-    detail: "Your city and hotel. We confirm the stay with you. This is not a live hotel booking.",
-    hotel,
-    kind: "vacation",
-  };
-}
-
-export function buildCustomHold(input: {
-  kind: "meet" | "reserve" | "vacation";
+/** One hold, one price. The budget the guest chose is the line total. */
+export function buildBookingHold(input: {
+  lane: "meet" | "reserve" | "vacation";
+  budgetId: string;
+  concertId?: string;
   city: string;
+  country: string;
+  venue: string;
+  date: string;
   hotel: string;
   price: number;
   title: string;
+  includes: string[];
   nights?: number;
+  memberId?: string;
+  party?: number;
+  image?: string;
 }): CityStayHold {
   const slug = input.city.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "city";
   return {
-    lineId: `${input.kind}-${slug}-${input.hotel.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
-    concertId: `custom-${slug}`,
+    lineId: `book-${input.lane}-${input.budgetId}-${slug}-${Date.now().toString(36)}`,
+    concertId: input.concertId || `custom-${slug}`,
     city: input.city,
-    country: "",
-    venue: "",
-    date: "",
+    country: input.country,
+    venue: input.venue,
+    date: input.date,
     nights: input.nights ?? 0,
     price: input.price,
-    image: "/concerts/arirang-hero.jpg",
+    image: input.image || "/concerts/arirang-hero.jpg",
     title: input.title,
-    detail: "Your city and hotel. We confirm this with you.",
+    detail: input.includes.join("\n"),
     hotel: input.hotel,
-    kind: input.kind,
+    kind: input.lane,
+    budgetId: input.budgetId,
+    memberId: input.memberId,
+    party: input.party,
+    includes: input.includes,
   };
 }

@@ -236,6 +236,11 @@ export interface CityStayHold {
   detail: string;
   hotel?: string;
   kind?: "meet" | "reserve" | "vacation";
+  budgetId?: string;
+  memberId?: string;
+  party?: number;
+  /** What this budget includes, in the language used when it was confirmed. */
+  includes?: string[];
 }
 
 export interface CartItem {

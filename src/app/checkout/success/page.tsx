@@ -13,20 +13,24 @@ import { bookingItinerary } from "@/lib/booking/itinerary";
 import { openPaymentChat, paymentChatMessage, readPaymentChat, type PaymentChatPayload } from "@/lib/support/tawk-checkout";
 import { Button } from "@/components/ui/button";
 import type { Order } from "@/lib/types";
+import { useI18n } from "@/lib/i18n/provider";
 
 function SuccessInner() {
   const params = useSearchParams();
   const orderId = params.get("order");
   const { getOrder, lastOrder, ready } = useOrders();
-  const { recordOrderTickets, profile } = useClientCard();
+  const { recordOrderTickets, profile, ready: cardReady } = useClientCard();
+  const { t } = useI18n();
   const [order, setOrder] = useState<Order | null>(null);
   const [chat, setChat] = useState<PaymentChatPayload | null>(null);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (!ready) return;
-    const next = orderId ? getOrder(orderId) ?? lastOrder : lastOrder;
-    setOrder(next);
+    if (!ready || !cardReady) return;
+    const found = orderId ? getOrder(orderId) ?? lastOrder : lastOrder;
+    const next =
+      found && found.clientCardNumber && found.clientCardNumber !== profile.number ? null : found;
+    setOrder(next ?? null);
     if (next && next.status !== "pending") recordOrderTickets(next);
     setChat(readPaymentChat());
     if (next && next.status === "pending") {
@@ -44,19 +48,19 @@ function SuccessInner() {
             }
       );
     }
-  }, [ready, orderId, getOrder, lastOrder, recordOrderTickets]);
+  }, [ready, cardReady, orderId, getOrder, lastOrder, recordOrderTickets, profile.number]);
 
-  if (!ready) {
-    return <div className="px-4 py-24 text-center text-cream/50">Loading your order…</div>;
+  if (!ready || !cardReady) {
+    return <div className="px-4 py-24 text-center text-cream/50">{t("ok.loading")}</div>;
   }
 
   if (!order) {
     return (
       <div className="mx-auto max-w-lg px-4 py-24 text-center">
-        <h1 className="text-2xl font-bold text-cream">Order confirmed</h1>
-        <p className="mt-2 text-cream/50">This order is not on this Client Card.</p>
+        <h1 className="text-2xl font-bold text-cream">{t("ok.order")}</h1>
+        <p className="mt-2 text-cream/50">{t("ok.missing")}</p>
         <Link href="/explore" className="mt-6 inline-block">
-          <Button>Keep shopping</Button>
+          <Button>{t("ok.keep")}</Button>
         </Link>
       </div>
     );
@@ -75,13 +79,11 @@ function SuccessInner() {
     <div className="mx-auto max-w-lg px-4 py-16 text-center">
       <CheckCircle2 className="mx-auto h-14 w-14 text-green-400" />
       <h1 className="mt-4 text-3xl font-bold text-cream">
-        {waitingOnChat ? "You're booked" : "You're in, ARMY"}
+        {waitingOnChat ? t("ok.booked") : t("ok.in")}
       </h1>
       <p className="mt-2 text-cream/60">
         Order <span className="font-mono text-purple-glow">{order.id}</span>{" "}
-        {waitingOnChat
-          ? "is held for you. We'll finish it from here. Your card is not charged on this page."
-          : "is on your Client Card."}
+        {waitingOnChat ? t("ok.held") : t("ok.onCard")}
       </p>
       {waitingOnChat && (
         <div className="mt-6">
@@ -102,7 +104,7 @@ function SuccessInner() {
                 )
               }
             >
-              Message us
+              {t("ok.message")}
             </Button>
             <Button
               variant="secondary"
@@ -110,7 +112,7 @@ function SuccessInner() {
                 void navigator.clipboard.writeText(note).then(() => setCopied(true));
               }}
             >
-              {copied ? "Copied" : "Copy the order"}
+              {copied ? t("ok.copied") : t("ok.copy")}
             </Button>
           </div>
           {itinerary && (
@@ -124,7 +126,7 @@ function SuccessInner() {
       )}
       <p className="mt-4 text-2xl font-bold text-cream">{formatPrice(order.total)}</p>
       <p className="mt-1 text-sm text-cream/40">
-        {itemCount} {itemCount === 1 ? "item" : "items"} · Client Card{" "}
+        {itemCount} {itemCount === 1 ? t("ok.item") : t("ok.items")} ·{" "}
         {order.clientCardNumber || profile.number}
       </p>
       <div className="mx-auto mt-8 max-w-sm text-left">
@@ -159,13 +161,13 @@ function SuccessInner() {
       )}
       <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
         <Link href="/vault">
-          <Button>View card and stubs</Button>
+          <Button>{t("ok.view")}</Button>
         </Link>
         <Link href="/box-office">
-          <Button variant="secondary">More seats</Button>
+          <Button variant="secondary">{t("ok.more")}</Button>
         </Link>
         <Link href="/members">
-          <Button variant="outline">Shop more members</Button>
+          <Button variant="outline">{t("ok.shop")}</Button>
         </Link>
       </div>
       <p className="mt-6 text-sm text-cream/45">
