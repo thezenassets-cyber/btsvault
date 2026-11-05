@@ -8,7 +8,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import type { CartItem, SeatHold, ShopMemberId } from "@/lib/types";
+import type { CartItem, CityStayHold, SeatHold, ShopMemberId } from "@/lib/types";
 import { getProductById, getProductPrimaryMember } from "@/data/products";
 import { getProductPrice } from "@/lib/catalog";
 
@@ -27,7 +27,8 @@ interface CartContextValue {
     selectedSize?: import("@/lib/types").ApparelSize,
     options?: { open?: boolean }
   ) => void;
-  addSeat: (seat: SeatHold) => void;
+  addSeat: (seat: SeatHold, options?: { open?: boolean }) => void;
+  addStay: (stay: CityStayHold, options?: { open?: boolean }) => void;
   removeFromCart: (key: string) => void;
   updateQuantity: (key: string, quantity: number) => void;
   clearMemberCart: (memberId: ShopMemberId | "ot7" | "box-office") => void;
@@ -58,12 +59,13 @@ export function cartLineKey(item: CartItem) {
 
 export function lineUnitPrice(item: CartItem) {
   if (item.seat) return item.seat.price + (item.seat.privateAccess?.price ?? 0);
+  if (item.stay) return item.stay.price;
   const product = getProductById(item.productId);
   return product ? getProductPrice(product) : 0;
 }
 
 function getCartMemberKey(item: CartItem): string {
-  if (item.seat) return "box-office";
+  if (item.seat || item.stay) return "box-office";
   const product = getProductById(item.productId);
   if (!product) return "ot7";
   const primary = getProductPrimaryMember(product);
@@ -130,7 +132,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
-  const addSeat = useCallback((seat: SeatHold) => {
+  const addSeat = useCallback((seat: SeatHold, options?: { open?: boolean }) => {
     setItems((prev) => {
       const line: CartItem = {
         productId: "vault-stadium-seat",
@@ -147,7 +149,27 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return [...prev, line];
     });
-    setIsOpen(true);
+    if (options?.open !== false) setIsOpen(true);
+  }, []);
+
+  const addStay = useCallback((stay: CityStayHold, options?: { open?: boolean }) => {
+    setItems((prev) => {
+      const line: CartItem = {
+        productId: "vault-city-stay",
+        quantity: 1,
+        addedAt: new Date().toISOString(),
+        lineId: stay.lineId,
+        stay,
+      };
+      const index = prev.findIndex((item) => item.lineId === stay.lineId);
+      if (index >= 0) {
+        const next = [...prev];
+        next[index] = line;
+        return next;
+      }
+      return [...prev, line];
+    });
+    if (options?.open !== false) setIsOpen(true);
   }, []);
 
   const removeFromCart = useCallback((key: string) => {
@@ -168,7 +190,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) => prev.filter((item) => getCartMemberKey(item) !== memberId));
   }, []);
 
-  const clearCart = useCallback(() => setItems([]), []);
+  const clearCart = useCallback(() => {
+    setItems([]);
+    localStorage.setItem(STORAGE_KEY, "[]");
+  }, []);
 
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
 
@@ -216,6 +241,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         toggleCart: () => setIsOpen((o) => !o),
         addToCart,
         addSeat,
+        addStay,
         removeFromCart,
         updateQuantity,
         clearMemberCart,

@@ -192,6 +192,7 @@ export interface SeatHold {
   seat: number;
   price: number;
   privateAccess?: PrivateAccessSelection;
+  hotel?: string;
 }
 
 export interface ClientCardProfile {
@@ -220,6 +221,23 @@ export interface TicketStub {
   clientCardNumber: string;
 }
 
+/** A Vault city-stay hold. The desk confirms it in chat. It is not a hotel or airline booking. */
+export interface CityStayHold {
+  lineId: string;
+  concertId: string;
+  city: string;
+  country: string;
+  venue: string;
+  date: string;
+  nights: number;
+  price: number;
+  image: string;
+  title: string;
+  detail: string;
+  hotel?: string;
+  kind?: "meet" | "reserve" | "vacation";
+}
+
 export interface CartItem {
   productId: string;
   quantity: number;
@@ -228,6 +246,7 @@ export interface CartItem {
   /** Unique key for a seat line. Merch lines omit this. */
   lineId?: string;
   seat?: SeatHold;
+  stay?: CityStayHold;
 }
 
 export type FilterState = {
@@ -289,6 +308,7 @@ export interface OrderLineItem {
   image: string;
   lineId?: string;
   seat?: SeatHold;
+  stay?: CityStayHold;
 }
 
 export interface Order {

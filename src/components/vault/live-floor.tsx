@@ -50,7 +50,6 @@ export function LiveFloor() {
   }, [grandTotal, ready]);
 
   if (pathname.startsWith("/admin") || drops.length === 0) return null;
-  const live = drops[spot];
 
   return (
     <div className="sticky top-[4.5rem] z-40 border-b border-gold/20 bg-charcoal">
@@ -79,7 +78,7 @@ export function LiveFloor() {
           }`}
           key={bump}
         >
-          {shown > 0 ? formatPrice(shown) : live ? `Add ${formatPrice(live.price)}` : "Pay in chat"}
+          {grandTotal > 0 ? formatPrice(shown > 0 ? shown : grandTotal) : "Checkout"}
         </Link>
       </div>
     </div>

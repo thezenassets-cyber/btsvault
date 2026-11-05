@@ -7,18 +7,23 @@ import { lineUnitPrice, useCart } from "@/components/cart/cart-context";
 import { useOrders } from "@/components/cart/order-context";
 import { useClientCard } from "@/components/client-card/client-card-context";
 import { ClientCard } from "@/components/client-card/client-card";
-import { SuperUpgrades } from "@/components/vault/super-upgrades";
 import { getProductById } from "@/data/products";
 import { admitCode } from "@/data/seating";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { submitCheckout } from "@/lib/payments/checkout";
 import { quoteTotals } from "@/lib/payments/types";
+import { bookingItinerary } from "@/lib/booking/itinerary";
 import { openPaymentChat } from "@/lib/support/tawk-checkout";
 import type { OrderLineItem, PaymentDetails, ShippingAddress } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { CatalogPhoto } from "@/components/catalog/catalog-photo";
 import { resolveProductPhoto } from "@/lib/product-images";
 import { Input } from "@/components/ui/input";
+
+function placeLabel(city: string, date: string) {
+  const when = formatDate(date);
+  return when ? `${city} · ${when}` : city;
+}
 
 export function CheckoutClient() {
   const { items, ready, grandTotal, clearCart } = useCart();
@@ -60,6 +65,17 @@ export function CheckoutClient() {
               seat: item.seat,
             } satisfies OrderLineItem;
           }
+          if (item.stay) {
+            return {
+              productId: item.productId,
+              name: item.stay.title,
+              quantity: 1,
+              unitPrice: item.stay.price,
+              image: item.stay.image,
+              lineId: item.stay.lineId,
+              stay: item.stay,
+            } satisfies OrderLineItem;
+          }
           const product = getProductById(item.productId);
           if (!product) return null;
           return {
@@ -79,13 +95,23 @@ export function CheckoutClient() {
     const shows = new Map<string, { label: string; items: OrderLineItem[] }>();
     const merch: OrderLineItem[] = [];
     for (const item of lineItems) {
+      if (item.stay) {
+        const key = item.stay.concertId;
+        const group = shows.get(key) ?? {
+          label: placeLabel(item.stay.city, item.stay.date),
+          items: [],
+        };
+        group.items.push(item);
+        shows.set(key, group);
+        continue;
+      }
       if (!item.seat) {
         merch.push(item);
         continue;
       }
       const key = item.seat.concertId;
       const group = shows.get(key) ?? {
-        label: `${item.seat.city} · ${formatDate(item.seat.date)}`,
+        label: placeLabel(item.seat.city, item.seat.date),
         items: [],
       };
       group.items.push(item);
@@ -142,6 +168,7 @@ export function CheckoutClient() {
         name: shipping.fullName,
         email,
         total: formatPrice(data.order.total),
+        itinerary: bookingItinerary(lineItems),
         items: lineItems
           .map((item) => `${item.quantity} × ${item.name} · ${formatPrice(item.unitPrice * item.quantity)}`)
           .join("\n"),
@@ -164,7 +191,7 @@ export function CheckoutClient() {
       <div className="mx-auto max-w-lg px-4 py-24 text-center">
         <ShoppingBag className="mx-auto mb-4 h-12 w-12 text-cream/30" />
         <h1 className="text-2xl font-bold text-cream">Your cart is empty</h1>
-        <p className="mt-2 text-cream/50">Add a drop from the floor, then pay in chat.</p>
+        <p className="mt-2 text-cream/50">Add what you want, then come back to confirm.</p>
         <Link href="/" className="mt-6 inline-block">
           <Button>Open the floor</Button>
         </Link>
@@ -174,14 +201,13 @@ export function CheckoutClient() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-      <h1 className="font-display text-3xl font-bold text-cream">Pay in chat</h1>
+      <h1 className="font-display text-3xl font-bold text-cream">Checkout</h1>
       <p className="mt-1 text-sm text-cream/50">
-        The desk opens in Tawk. Your Client Card is not charged on this page. Stripe can take this step later.
+        Confirm the hold. Your card is not charged on this page.
       </p>
 
       <div className="mt-8 grid min-w-0 gap-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
         <div className="min-w-0 space-y-6">
-          <SuperUpgrades />
           <section className="rounded-2xl glass p-6">
             <h2 className="mb-4 text-lg font-semibold text-cream">On your card</h2>
             <div className="space-y-6">
@@ -212,7 +238,7 @@ export function CheckoutClient() {
         <aside className="h-fit space-y-4">
           <ClientCard size="full" />
           <div className="rounded-2xl border border-gold/30 bg-white/5 p-6">
-            <h2 className="text-sm font-semibold tracking-wider text-gold uppercase">Payment desk</h2>
+            <h2 className="text-sm font-semibold tracking-wider text-gold uppercase">Your details</h2>
             <div className="mt-4 space-y-3">
               <label className="block text-xs text-cream/50">
                 Name
@@ -239,13 +265,13 @@ export function CheckoutClient() {
                 <dd className="text-cream">{formatPrice(total)}</dd>
               </div>
             </dl>
-            <p className="mt-2 text-xs text-cream/45">Shipping and tax are confirmed in the chat, not added here.</p>
+            <p className="mt-2 text-xs text-cream/45">Shipping and tax are settled after this step, not added here.</p>
             {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
             <Button className="mt-5 w-full" onClick={placeOrder} disabled={submitting}>
-              {submitting ? "Opening the desk…" : `Pay in chat · ${formatPrice(total)}`}
+              {submitting ? "Confirming…" : `Confirm · ${formatPrice(total)}`}
             </Button>
             <p className="mt-3 text-xs text-cream/40">
-              Client Card {cardReady ? profile.number : ""}. The chat gets the order. No bank charge from this button.
+              Client Card {cardReady ? profile.number : ""}. Your card is not charged on this page.
             </p>
           </div>
         </aside>

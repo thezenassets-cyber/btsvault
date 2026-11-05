@@ -7,6 +7,7 @@ export interface PaymentChatPayload {
   email: string;
   total: string;
   items: string;
+  itinerary?: string;
 }
 
 type TawkApi = {
@@ -33,6 +34,7 @@ export function paymentChatMessage(payload: PaymentChatPayload) {
     payload.name,
     payload.email,
     `Total ${payload.total}`,
+    payload.itinerary,
     payload.items,
   ]
     .filter(Boolean)
@@ -81,20 +83,26 @@ function pushToDesk(payload: PaymentChatPayload) {
   return true;
 }
 
-/** Opens the Tawk desk with this order and resolves immediately so checkout can finish. */
-export function openPaymentChat(payload: PaymentChatPayload): Promise<"widget" | "tab"> {
-  if (typeof window !== "undefined") {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-  }
-  if (typeof window === "undefined") return Promise.resolve("tab");
-  if (pushToDesk(payload)) return Promise.resolve("widget");
+const OPENED_KEY = "army-vault-payment-chat-opened";
 
+/** Opens the Tawk desk after checkout has already moved on. maximize never blocks the button. */
+export function openPaymentChat(payload: PaymentChatPayload): Promise<"widget" | "tab"> {
+  if (typeof window === "undefined") return Promise.resolve("tab");
+  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  const ready = typeof window.Tawk_API?.maximize === "function";
+  window.setTimeout(() => deliverToDesk(payload), 0);
+  return Promise.resolve(ready ? "widget" : "tab");
+}
+
+function deliverToDesk(payload: PaymentChatPayload) {
+  if (pushToDesk(payload)) return;
   const api = (window.Tawk_API = window.Tawk_API || {});
   const previousLoaded = api.onLoaded;
   api.onLoaded = () => {
     previousLoaded?.();
     pushToDesk(payload);
   };
+  if (sessionStorage.getItem(OPENED_KEY) === payload.orderId) return;
+  sessionStorage.setItem(OPENED_KEY, payload.orderId);
   window.open(TAWK_CHAT_URL, "_blank", "noopener,noreferrer");
-  return Promise.resolve("tab");
 }

@@ -3,12 +3,13 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { CheckCircle2, MessageCircle } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { useOrders } from "@/components/cart/order-context";
 import { useClientCard } from "@/components/client-card/client-card-context";
 import { ClientCard } from "@/components/client-card/client-card";
 import { admitCode } from "@/data/seating";
 import { formatPrice } from "@/lib/utils";
+import { bookingItinerary } from "@/lib/booking/itinerary";
 import { openPaymentChat, paymentChatMessage, readPaymentChat, type PaymentChatPayload } from "@/lib/support/tawk-checkout";
 import { Button } from "@/components/ui/button";
 import type { Order } from "@/lib/types";
@@ -28,6 +29,21 @@ function SuccessInner() {
     setOrder(next);
     if (next && next.status !== "pending") recordOrderTickets(next);
     setChat(readPaymentChat());
+    if (next && next.status === "pending") {
+      const stored = readPaymentChat();
+      void openPaymentChat(
+        stored && stored.orderId === next.id
+          ? stored
+          : {
+              orderId: next.id,
+              name: next.shipping.fullName,
+              email: next.shipping.email,
+              total: formatPrice(next.total),
+              itinerary: bookingItinerary(next.items),
+              items: next.items.map((item) => `${item.quantity} × ${item.name}`).join("\n"),
+            }
+      );
+    }
   }, [ready, orderId, getOrder, lastOrder, recordOrderTickets]);
 
   if (!ready) {
@@ -48,25 +64,23 @@ function SuccessInner() {
 
   const itemCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
   const waitingOnChat = order.status === "pending";
+  const itinerary =
+    chat && chat.orderId === order.id && chat.itinerary ? chat.itinerary : bookingItinerary(order.items);
   const note =
     chat && chat.orderId === order.id
       ? paymentChatMessage(chat)
-      : `ARMY Vault payment\nOrder ${order.id}\nTotal ${formatPrice(order.total)}`;
+      : `ARMY Vault payment\nOrder ${order.id}\nTotal ${formatPrice(order.total)}${itinerary ? `\n${itinerary}` : ""}`;
 
   return (
     <div className="mx-auto max-w-lg px-4 py-16 text-center">
-      {waitingOnChat ? (
-        <MessageCircle className="mx-auto h-14 w-14 text-gold" />
-      ) : (
-        <CheckCircle2 className="mx-auto h-14 w-14 text-green-400" />
-      )}
+      <CheckCircle2 className="mx-auto h-14 w-14 text-green-400" />
       <h1 className="mt-4 text-3xl font-bold text-cream">
-        {waitingOnChat ? "The desk is open" : "You're in, ARMY"}
+        {waitingOnChat ? "You're booked" : "You're in, ARMY"}
       </h1>
       <p className="mt-2 text-cream/60">
         Order <span className="font-mono text-purple-glow">{order.id}</span>{" "}
         {waitingOnChat
-          ? "is in the chat, with the total already written in the box. Send it so the desk can take payment. This page does not charge the Client Card."
+          ? "is held for you. We'll finish it from here. Your card is not charged on this page."
           : "is on your Client Card."}
       </p>
       {waitingOnChat && (
@@ -82,12 +96,13 @@ function SuccessInner() {
                         name: order.shipping.fullName,
                         email: order.shipping.email,
                         total: formatPrice(order.total),
+                        itinerary: bookingItinerary(order.items),
                         items: order.items.map((item) => `${item.quantity} × ${item.name}`).join("\n"),
                       }
                 )
               }
             >
-              Reopen the chat
+              Message us
             </Button>
             <Button
               variant="secondary"
@@ -98,9 +113,13 @@ function SuccessInner() {
               {copied ? "Copied" : "Copy the order"}
             </Button>
           </div>
-          <pre className="mt-4 overflow-x-auto rounded-2xl border border-white/10 bg-white/5 p-4 text-left text-xs whitespace-pre-wrap text-cream/70">
-            {note}
-          </pre>
+          {itinerary && (
+            <ul className="mx-auto mt-6 max-w-sm space-y-1 text-left text-sm text-cream/75">
+              {itinerary.split("\n").map((line, index) => (
+                <li key={`${index}-${line}`}>{line}</li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
       <p className="mt-4 text-2xl font-bold text-cream">{formatPrice(order.total)}</p>
@@ -125,7 +144,7 @@ function SuccessInner() {
               <li key={item.lineId ?? item.name} className="rounded-xl border border-white/10 px-4 py-3">
                 {code && <p className="font-mono text-[11px] text-gold">{code}</p>}
                 <p>{words}</p>
-                {item.seat && (
+                {item.seat && !waitingOnChat && (
                   <Link
                     href={`/tickets/${encodeURIComponent(`${order.id}:${item.seat.lineId}`)}`}
                     className="mt-2 inline-block text-xs font-semibold text-purple-glow hover:text-cream"

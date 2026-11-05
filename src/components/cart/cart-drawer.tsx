@@ -101,14 +101,16 @@ export function CartDrawer() {
                   </div>
                   <ul className="space-y-3">
                     {group.items.map((cartItem) => {
-                      const product = cartItem.seat ? null : getProductById(cartItem.productId);
-                      if (!product && !cartItem.seat) return null;
+                      const product = cartItem.seat || cartItem.stay ? null : getProductById(cartItem.productId);
+                      if (!product && !cartItem.seat && !cartItem.stay) return null;
                       const price = lineUnitPrice(cartItem);
                       const key = cartLineKey(cartItem);
-                      const title = cartItem.seat
-                        ? `${cartItem.seat.city} · ${cartItem.seat.sectionId} ${cartItem.seat.sectionLabel}`
-                        : product!.name;
-                      const image = cartItem.seat?.image || product!.image;
+                      const title = cartItem.stay
+                        ? cartItem.stay.title
+                        : cartItem.seat
+                          ? `${cartItem.seat.city} · ${cartItem.seat.sectionId} ${cartItem.seat.sectionLabel}`
+                          : product!.name;
+                      const image = cartItem.stay?.image || cartItem.seat?.image || product!.image;
                       const code = cartItem.seat
                         ? admitCode(
                             cartItem.seat.concertId,
@@ -117,9 +119,11 @@ export function CartDrawer() {
                             cartItem.seat.seat
                           )
                         : null;
-                      const detail = cartItem.seat
-                        ? `${cartItem.seat.rollLabel} · Row ${cartItem.seat.row} · Seat ${cartItem.seat.seat}`
-                        : null;
+                      const detail = cartItem.stay
+                        ? cartItem.stay.detail
+                        : cartItem.seat
+                          ? `${cartItem.seat.rollLabel} · Row ${cartItem.seat.row} · Seat ${cartItem.seat.seat}`
+                          : null;
                       return (
                         <li key={key} className="flex gap-3">
                           <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-charcoal">
@@ -143,7 +147,7 @@ export function CartDrawer() {
                             )}
                             <p className="mt-1 text-sm font-semibold text-cream">{formatPrice(price)}</p>
                             <div className="mt-2 flex items-center gap-2">
-                              {!cartItem.seat && (
+                              {!cartItem.seat && !cartItem.stay && (
                                 <>
                                   <button
                                     onClick={() => updateQuantity(key, cartItem.quantity - 1)}
@@ -191,7 +195,7 @@ export function CartDrawer() {
             </div>
             <SuperUpgrades compact />
             <Link href="/checkout" onClick={closeCart} className="mt-4 block">
-              <Button className="w-full">Pay in chat · {formatPrice(grandTotal)}</Button>
+              <Button className="w-full">Checkout · {formatPrice(grandTotal)}</Button>
             </Link>
             <Link href="/members" onClick={closeCart}>
               <Button variant="outline" className="mt-2 w-full">

@@ -19,11 +19,16 @@ export default function ExperiencesPage() {
             preferred member and track your application.
           </p>
         </div>
-        <Link href="/experiences/apply">
-          <Button size="lg">
-            Start Application <ArrowRight className="h-4 w-4" />
-          </Button>
-        </Link>
+        <div className="flex flex-wrap gap-3">
+          <Link href="/book">
+            <Button size="lg">Book a visit</Button>
+          </Link>
+          <Link href="/experiences/apply">
+            <Button size="lg" variant="secondary">
+              Start Application <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {open.length > 0 && (

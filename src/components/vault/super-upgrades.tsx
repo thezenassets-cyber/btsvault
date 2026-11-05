@@ -30,7 +30,7 @@ export function SuperUpgrades({ compact = false }: { compact?: boolean }) {
         <div className="mb-5">
           <h2 className="font-display text-2xl font-bold text-cream sm:text-3xl">Super upgrades</h2>
           <p className="mt-2 text-cream/55">
-            Tap one. It lands on your Client Card at the Vault price, then you pay in chat.
+            Tap one. It goes on your card at the Vault price.
           </p>
         </div>
       )}
