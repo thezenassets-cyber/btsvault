@@ -11,7 +11,6 @@ import type { ShopMemberId } from "@/lib/types";
 import { isShopMember } from "@/data/members";
 import { getProductById } from "@/data/products";
 import { admitCode } from "@/data/seating";
-import { SuperUpgrades } from "@/components/vault/super-upgrades";
 import { tuckPaymentChat } from "@/lib/support/tawk-checkout";
 import { useI18n } from "@/lib/i18n/provider";
 
@@ -195,8 +194,7 @@ export function CartDrawer() {
               <span className="text-cream/60">{t("cart.total")}</span>
               <span className="text-xl font-bold text-cream">{formatPrice(grandTotal)}</span>
             </div>
-            <SuperUpgrades compact />
-            <Link href="/checkout" onClick={closeCart} className="mt-4 block">
+            <Link href="/checkout" onClick={closeCart} className="block">
               <Button className="w-full">{t("cart.checkout")} · {formatPrice(grandTotal)}</Button>
             </Link>
             <Link href="/members" onClick={closeCart}>

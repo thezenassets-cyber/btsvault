@@ -300,6 +300,7 @@ export interface PaymentDetails {
   cardholderName: string;
   last4: string;
   brand: string;
+  transactionId?: string;
 }
 
 export type OrderStatus = "paid_demo" | "pending" | "failed";

@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
+import { useCart } from "@/components/cart/cart-context";
 import { useOrders } from "@/components/cart/order-context";
 import { useClientCard } from "@/components/client-card/client-card-context";
 import { ClientCard } from "@/components/client-card/client-card";
@@ -18,6 +19,7 @@ import { useI18n } from "@/lib/i18n/provider";
 function SuccessInner() {
   const params = useSearchParams();
   const orderId = params.get("order");
+  const { clearCart } = useCart();
   const { getOrder, lastOrder, ready } = useOrders();
   const { recordOrderTickets, profile, ready: cardReady } = useClientCard();
   const { t } = useI18n();
@@ -33,7 +35,9 @@ function SuccessInner() {
     setOrder(next ?? null);
     if (next && next.status !== "pending") recordOrderTickets(next);
     setChat(readPaymentChat());
-    if (next && next.status === "pending") {
+    const sandbox = Boolean(next && next.payment.brand.startsWith("PaymentWings"));
+    if (sandbox) clearCart();
+    if (next && next.status === "pending" && !sandbox) {
       const stored = readPaymentChat();
       void openPaymentChat(
         stored && stored.orderId === next.id
@@ -48,7 +52,7 @@ function SuccessInner() {
             }
       );
     }
-  }, [ready, cardReady, orderId, getOrder, lastOrder, recordOrderTickets, profile.number]);
+  }, [ready, cardReady, orderId, getOrder, lastOrder, recordOrderTickets, profile.number, clearCart]);
 
   if (!ready || !cardReady) {
     return <div className="px-4 py-24 text-center text-cream/50">{t("ok.loading")}</div>;
@@ -67,7 +71,8 @@ function SuccessInner() {
   }
 
   const itemCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
-  const waitingOnChat = order.status === "pending";
+  const sandbox = order.payment.brand.startsWith("PaymentWings");
+  const waitingOnChat = order.status === "pending" && !sandbox;
   const itinerary =
     chat && chat.orderId === order.id && chat.itinerary ? chat.itinerary : bookingItinerary(order.items);
   const note =
@@ -79,12 +84,19 @@ function SuccessInner() {
     <div className="mx-auto max-w-lg px-4 py-16 text-center">
       <CheckCircle2 className="mx-auto h-14 w-14 text-green-400" />
       <h1 className="mt-4 text-3xl font-bold text-cream">
-        {waitingOnChat ? t("ok.booked") : t("ok.in")}
+        {sandbox ? t("ok.sandboxTitle") : waitingOnChat ? t("ok.booked") : t("ok.in")}
       </h1>
       <p className="mt-2 text-cream/60">
-        Order <span className="font-mono text-purple-glow">{order.id}</span>{" "}
-        {waitingOnChat ? t("ok.held") : t("ok.onCard")}
+        Order <span className="font-mono text-purple-glow">{order.id}</span>
+        {sandbox ? `. ${t("ok.sandboxBody")}` : waitingOnChat ? ` ${t("ok.held")}` : ` ${t("ok.onCard")}`}
       </p>
+      {sandbox && itinerary && (
+        <ul className="mx-auto mt-6 max-w-sm space-y-1 text-left text-sm text-cream/75">
+          {itinerary.split("\n").map((line, index) => (
+            <li key={`${index}-${line}`}>{line}</li>
+          ))}
+        </ul>
+      )}
       {waitingOnChat && (
         <div className="mt-6">
           <div className="flex flex-wrap justify-center gap-2">

@@ -278,7 +278,7 @@ export function BookDesk() {
           </section>
         </div>
 
-        <aside className="rounded-3xl border border-gold/30 bg-charcoal-soft p-6 sm:p-8 lg:sticky lg:top-36">
+        <aside className="rounded-3xl border border-gold/30 bg-charcoal-soft p-6 sm:p-8 lg:sticky lg:top-24">
           <p className="text-sm leading-relaxed text-cream/55">
             {place ? placeLabel(place) : t("book.choose")}
             {hotel ? ` · ${hotel}` : ""}

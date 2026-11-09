@@ -64,8 +64,8 @@ export type CheckoutPayload = {
   subtotal: number;
   currency: string;
   clientCardNumber?: string;
-  /** Chat desk holds the order. Stripe can replace this later. */
-  channel?: "tawk" | "card";
+  /** Hosted checkout. Chat remains a support channel. */
+  channel?: "tawk" | "card" | "paymentwings";
 };
 
 /** Shipping follows merch only. Seat tickets are digital and do not add a shipping fee. */

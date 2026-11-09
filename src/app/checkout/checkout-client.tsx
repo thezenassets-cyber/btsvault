@@ -12,8 +12,6 @@ import { admitCode } from "@/data/seating";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { submitCheckout } from "@/lib/payments/checkout";
 import { quoteTotals } from "@/lib/payments/types";
-import { bookingItinerary } from "@/lib/booking/itinerary";
-import { openPaymentChat } from "@/lib/support/tawk-checkout";
 import type { OrderLineItem, PaymentDetails, ShippingAddress } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { CatalogPhoto } from "@/components/catalog/catalog-photo";
@@ -27,7 +25,7 @@ function placeLabel(city: string, date: string) {
 }
 
 export function CheckoutClient() {
-  const { items, ready, grandTotal, clearCart } = useCart();
+  const { items, ready, grandTotal } = useCart();
   const { saveOrder } = useOrders();
   const { profile, ready: cardReady } = useClientCard();
   const { t } = useI18n();
@@ -37,12 +35,17 @@ export function CheckoutClient() {
   const [seeded, setSeeded] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [canceled, setCanceled] = useState(false);
 
   useEffect(() => {
     if (!cardReady || seeded) return;
     setName(profile.holderName);
     setSeeded(true);
   }, [cardReady, profile.holderName, seeded]);
+
+  useEffect(() => {
+    setCanceled(new URLSearchParams(window.location.search).get("canceled") === "1");
+  }, []);
 
   const lineItems: OrderLineItem[] = useMemo(
     () =>
@@ -126,9 +129,9 @@ export function CheckoutClient() {
     fullName: name || profile.holderName,
     email,
     phone,
-    line1: "Collect in chat",
+    line1: profile.number,
     line2: "",
-    city: "Chat desk",
+    city: "",
     state: "",
     postalCode: "",
     country: "US",
@@ -138,12 +141,12 @@ export function CheckoutClient() {
   const paymentPreview: PaymentDetails = {
     cardholderName: shipping.fullName,
     last4: profile.number.replace(/\D/g, "").slice(-4),
-    brand: "Chat desk",
+    brand: "PaymentWings",
   };
 
   async function placeOrder() {
-    if (!email.includes("@")) {
-      setError("Add the email the desk should use.");
+      if (!email.includes("@")) {
+      setError("Add the email for this checkout.");
       return;
     }
     setSubmitting(true);
@@ -161,22 +164,29 @@ export function CheckoutClient() {
         subtotal: grandTotal,
         currency: "USD",
         clientCardNumber: profile.number,
-        channel: "tawk",
+        channel: "paymentwings",
       });
       if ("error" in data) throw new Error(data.error);
-      saveOrder(data.order);
-      const mode = await openPaymentChat({
-        orderId: data.orderId,
-        name: shipping.fullName,
-        email,
-        total: formatPrice(data.order.total),
-        itinerary: bookingItinerary(lineItems),
-        items: lineItems
-          .map((item) => `${item.quantity} × ${item.name} · ${formatPrice(item.unitPrice * item.quantity)}`)
-          .join("\n"),
+      const response = await fetch("/api/payments/paymentwings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: data.order.total,
+          currency: "USD",
+          email,
+          orderId: data.orderId,
+          origin: window.location.origin,
+        }),
       });
-      clearCart();
-      window.location.assign(`/checkout/success?order=${encodeURIComponent(data.orderId)}&desk=${mode}`);
+      const session = (await response.json()) as { url?: string; transactionId?: string; error?: string };
+      if (!response.ok || !session.url || !session.transactionId) {
+        throw new Error(session.error || "PaymentWings could not start checkout");
+      }
+      saveOrder({
+        ...data.order,
+        payment: { ...data.order.payment, transactionId: session.transactionId },
+      });
+      window.location.assign(session.url);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Checkout failed");
     } finally {
@@ -266,12 +276,13 @@ export function CheckoutClient() {
               </div>
             </dl>
             <p className="mt-2 text-xs text-cream/45">{t("out.ship")}</p>
+            {canceled && <p className="mt-4 text-sm text-cream/70">{t("out.canceled")}</p>}
             {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
             <Button className="mt-5 w-full" onClick={placeOrder} disabled={submitting}>
-              {submitting ? t("out.confirming") : `${t("out.confirm")} · ${formatPrice(total)}`}
+              {submitting ? t("out.confirming") : `${t("out.continue")} · ${formatPrice(total)}`}
             </Button>
             <p className="mt-3 text-xs text-cream/40">
-              {cardReady ? profile.number : ""}. {t("out.cardNote")}
+              {cardReady ? profile.number : ""}. {t("out.sandbox")}
             </p>
           </div>
         </aside>
