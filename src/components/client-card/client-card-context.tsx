@@ -84,7 +84,10 @@ export function ClientCardProvider({ children }: { children: React.ReactNode }) 
       next = freshProfile();
     }
     setProfile(next);
-    if (next.number) announceCard(next.number);
+    if (next.issuedAt && next.number && next.number !== "AV-0000-0000-0000") {
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(next));
+      announceCard(next.number);
+    }
     setLoaded(true);
   }, []);
 

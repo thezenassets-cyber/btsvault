@@ -125,6 +125,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     const existing = readStoredCard();
     if (existing) adopt(existing);
+    else setLoaded(true);
     const onCard = (event: Event) => {
       const number = (event as CustomEvent<string>).detail;
       if (number) adopt(number);
