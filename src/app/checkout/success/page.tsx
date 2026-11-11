@@ -20,7 +20,7 @@ function SuccessInner() {
   const params = useSearchParams();
   const orderId = params.get("order");
   const { clearCart } = useCart();
-  const { getOrder, lastOrder, ready } = useOrders();
+  const { getOrder, lastOrder, ready, saveOrder } = useOrders();
   const { recordOrderTickets, profile, ready: cardReady } = useClientCard();
   const { t } = useI18n();
   const [order, setOrder] = useState<Order | null>(null);
@@ -33,11 +33,26 @@ function SuccessInner() {
     const next =
       found && found.clientCardNumber && found.clientCardNumber !== profile.number ? null : found;
     setOrder(next ?? null);
-    if (next && next.status !== "pending") recordOrderTickets(next);
+    const wings = Boolean(next && next.payment.brand.startsWith("PaymentWings"));
+    const settled = next?.status === "paid" || next?.status === "paid_demo";
+    if (next && settled) {
+      recordOrderTickets(next);
+      if (wings) clearCart();
+    }
+    if (next && wings && next.status === "pending" && next.payment.transactionId) {
+      const txn = next.payment.transactionId;
+      const amount = next.total;
+      const order = next;
+      void fetch(`/api/payments/paymentwings/status?txn=${encodeURIComponent(txn)}&amount=${encodeURIComponent(String(amount))}`)
+        .then((response) => response.json())
+        .then((body: { completed?: boolean }) => {
+          if (!body.completed) return;
+          saveOrder({ ...order, status: "paid" });
+        })
+        .catch(() => undefined);
+    }
     setChat(readPaymentChat());
-    const sandbox = Boolean(next && next.payment.brand.startsWith("PaymentWings"));
-    if (sandbox) clearCart();
-    if (next && next.status === "pending" && !sandbox) {
+    if (next && next.status === "pending" && !wings) {
       const stored = readPaymentChat();
       void openPaymentChat(
         stored && stored.orderId === next.id
@@ -52,7 +67,7 @@ function SuccessInner() {
             }
       );
     }
-  }, [ready, cardReady, orderId, getOrder, lastOrder, recordOrderTickets, profile.number, clearCart]);
+  }, [ready, cardReady, orderId, getOrder, lastOrder, recordOrderTickets, profile.number, clearCart, saveOrder]);
 
   if (!ready || !cardReady) {
     return <div className="px-4 py-24 text-center text-cream/50">{t("ok.loading")}</div>;
@@ -71,8 +86,9 @@ function SuccessInner() {
   }
 
   const itemCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
-  const sandbox = order.payment.brand.startsWith("PaymentWings");
-  const waitingOnChat = order.status === "pending" && !sandbox;
+  const wings = order.payment.brand.startsWith("PaymentWings");
+  const paid = order.status === "paid" || order.status === "paid_demo";
+  const waitingOnChat = order.status === "pending" && !wings;
   const itinerary =
     chat && chat.orderId === order.id && chat.itinerary ? chat.itinerary : bookingItinerary(order.items);
   const note =
@@ -84,13 +100,13 @@ function SuccessInner() {
     <div className="mx-auto max-w-lg px-4 py-16 text-center">
       <CheckCircle2 className="mx-auto h-14 w-14 text-green-400" />
       <h1 className="mt-4 text-3xl font-bold text-cream">
-        {sandbox ? t("ok.sandboxTitle") : waitingOnChat ? t("ok.booked") : t("ok.in")}
+        {wings && paid ? t("ok.sandboxTitle") : waitingOnChat || wings ? t("ok.booked") : t("ok.in")}
       </h1>
       <p className="mt-2 text-cream/60">
         Order <span className="font-mono text-purple-glow">{order.id}</span>
-        {sandbox ? `. ${t("ok.sandboxBody")}` : waitingOnChat ? ` ${t("ok.held")}` : ` ${t("ok.onCard")}`}
+        {wings && paid ? `. ${t("ok.sandboxBody")}` : wings ? `. ${t("ok.unpaid")}` : waitingOnChat ? ` ${t("ok.held")}` : ` ${t("ok.onCard")}`}
       </p>
-      {sandbox && itinerary && (
+      {wings && paid && itinerary && (
         <ul className="mx-auto mt-6 max-w-sm space-y-1 text-left text-sm text-cream/75">
           {itinerary.split("\n").map((line, index) => (
             <li key={`${index}-${line}`}>{line}</li>
@@ -158,7 +174,7 @@ function SuccessInner() {
               <li key={item.lineId ?? item.name} className="rounded-xl border border-white/10 px-4 py-3">
                 {code && <p className="font-mono text-[11px] text-gold">{code}</p>}
                 <p>{words}</p>
-                {item.seat && !waitingOnChat && (
+                {item.seat && paid && (
                   <Link
                     href={`/tickets/${encodeURIComponent(`${order.id}:${item.seat.lineId}`)}`}
                     className="mt-2 inline-block text-xs font-semibold text-purple-glow hover:text-cream"

@@ -138,6 +138,8 @@ export function CheckoutClient() {
   };
   const { total } = quoteTotals(lineItems, shipping.country, grandTotal, { desk: true });
 
+  const emailReady = email.includes("@");
+
   const paymentPreview: PaymentDetails = {
     cardholderName: shipping.fullName,
     last4: profile.number.replace(/\D/g, "").slice(-4),
@@ -145,10 +147,7 @@ export function CheckoutClient() {
   };
 
   async function placeOrder() {
-      if (!email.includes("@")) {
-      setError("Add the email for this checkout.");
-      return;
-    }
+      if (!emailReady) return;
     setSubmitting(true);
     setError(null);
     try {
@@ -278,8 +277,8 @@ export function CheckoutClient() {
             <p className="mt-2 text-xs text-cream/45">{t("out.ship")}</p>
             {canceled && <p className="mt-4 text-sm text-cream/70">{t("out.canceled")}</p>}
             {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
-            <Button className="mt-5 w-full" onClick={placeOrder} disabled={submitting}>
-              {submitting ? t("out.confirming") : `${t("out.continue")} · ${formatPrice(total)}`}
+            <Button className="mt-5 w-full" onClick={placeOrder} disabled={submitting || !emailReady}>
+              {submitting ? t("out.confirming") : emailReady ? `${t("out.continue")} · ${formatPrice(total)}` : t("out.needEmail")}
             </Button>
             <p className="mt-3 text-xs text-cream/40">
               {cardReady ? profile.number : ""}. {t("out.sandbox")}

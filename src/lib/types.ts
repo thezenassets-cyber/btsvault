@@ -303,7 +303,7 @@ export interface PaymentDetails {
   transactionId?: string;
 }
 
-export type OrderStatus = "paid_demo" | "pending" | "failed";
+export type OrderStatus = "paid" | "paid_demo" | "pending" | "failed";
 
 export interface OrderLineItem {
   productId: string;

@@ -53,6 +53,25 @@ export async function createPaymentWingsCheckout(input: {
   };
 }
 
+/** Server-side check. A buyer return counts only when this transaction is COMPLETED for the same amount. */
+export async function lookupPaymentWings(transactionId: string) {
+  const response = await fetch(`${API}/api/lookup/${encodeURIComponent(transactionId)}`);
+  const payload = (await response.json().catch(() => null)) as {
+    data?: { status?: string; amount?: string | number; currency?: string };
+  } | null;
+  const amount = Number(payload?.data?.amount);
+  return {
+    status: String(payload?.data?.status || "").toUpperCase(),
+    amount: Number.isFinite(amount) ? amount : null,
+    currency: payload?.data?.currency || "",
+  };
+}
+
+export function paymentAmountsMatch(paid: number | null, expected: number) {
+  if (paid == null || !Number.isFinite(expected)) return false;
+  return Math.abs(paid - expected) < 0.02;
+}
+
 /** md5(txn|timestamp|webhook_key), compared without leaking which side failed. */
 export function verifyPaymentWingsWebhook(body: {
   txn?: unknown;
